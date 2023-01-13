@@ -215,35 +215,29 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         double y = lefty * maxVelocity;
         double angle = rightx * maxAngularVelocity;
         driveSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(x, y, angle, getHeadingRot());//jeevan and vidur contribution to this
-       //driveSpeeds = new ChassisSpeeds(x, y, angle);
         System.out.println(driveSpeeds);
         System.out.printf("X: %f Y: %f Angle: %f\n",x,y,angle); 
     }
     public void drive(ChassisSpeeds speeds){
         states = swerveKinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, maxVelocity);
-        for(NemesisModule module : swerveMods) module.reset();  
-        frontLeftModule.set((states[0].speedMetersPerSecond / maxVelocity)* maxVoltage, states[0].angle.getRadians());
-        frontRightModule.set((states[1].speedMetersPerSecond / maxVelocity) * maxVoltage, states[1].angle.getRadians());
-        backLeftModule.set((states[2].speedMetersPerSecond / maxVelocity) * maxVoltage, states[2].angle.getRadians());
-        backRightModule.set((states[3].speedMetersPerSecond / maxVelocity) * maxVoltage, states[3].angle.getRadians());
-        
+        int i = 0;
+        for(NemesisModule module : swerveMods){
+            module.set((states[i].speedMetersPerSecond / maxVelocity)* maxVoltage, states[i].angle.getRadians());
+        }
     }
     public void zeroGyro() {
        gyro.setYaw(0);
       }
     public void resetOdometry(Pose2d resetpose, SwerveModulePosition[] modPositions){
+        for(NemesisModule module : swerveMods) module.reset();  
         odometry.resetPosition(getHeadingRot(),modPositions,resetpose);
 
     }
     public void resetEncoder(){
         // Resetting Encoders 
-        for(CANCoder encoder : encoders){
-            encoder.setPosition(0);
-        }
-        for(NemesisModule module : swerveMods){
-            module.reset();
-        }
+        for(CANCoder encoder : encoders)encoder.setPosition(0);
+        for(NemesisModule module : swerveMods) module.reset();
         resetOdometry(new Pose2d(0, 0, getHeadingRot()), positions);
         
     }

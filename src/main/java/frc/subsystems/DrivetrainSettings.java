@@ -42,7 +42,7 @@ public interface DrivetrainSettings {
     public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 11; // FIXME Set back right steer encoder ID
     public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(286.52+1.83+1.07+2.64); //295
 
-    public static final double MAX_VELOCITY = 2;
+    public static final double MAX_VELOCITY = 3;
     public static final double MAX_ACCELERATION = 1;
 
     // kinematics

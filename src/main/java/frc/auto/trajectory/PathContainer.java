@@ -1,14 +1,27 @@
 package frc.auto.trajectory;
 
+import java.nio.file.Path;
+
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
+import edu.wpi.first.wpilibj.Filesystem;
 import frc.subsystems.DrivetrainSettings;
 
 public class PathContainer implements DrivetrainSettings{
+
+    // static String RoboRios_curveJSOn="paths/output/AyanPath.wpilib.json";  
+    static String RoboRios_curveJSOn="paths/output/AyanPath.wpilib.json";  
+    static Path s_curvePath=Filesystem.getDeployDirectory().toPath().resolve(RoboRios_curveJSOn); //This gets the path from the src/main/deploy
+
+
     // trajectory config should be the same for all paths
     static TrajectoryConfig TRAJECTORY_CONFIG = new TrajectoryConfig(MAX_VELOCITY, MAX_ACCELERATION)
         // Add kinematics to ensure max speed is actually obeyed
@@ -44,4 +57,6 @@ public class PathContainer implements DrivetrainSettings{
             startingPosition, 
             reverseWaypoints
         );
+
+        PathPlannerTrajectory examplePath = PathPlanner.loadPath("Example Path", new PathConstraints(4, 3));
 }

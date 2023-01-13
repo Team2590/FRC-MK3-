@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.server.PathPlannerServer;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -48,6 +50,8 @@ public class Robot extends TimedRobot {
     drivetrain.zeroGyro();
     drivetrain.outputOdometry();
     drivetrain.resetEncoder();
+
+    PathPlannerServer.startServer(5811);
 
   }
 
