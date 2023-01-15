@@ -2,57 +2,34 @@ package frc.subsystems;
 
 import frc.robot.RobotMap;
 import frc.util.NemesisModule;
-import frc.auto.trajectory.PathContainer;
-
-import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
-import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
-// import com.swervedrivespecialties.swervelib.SwerveModule;
 import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper.GearRatio;
-
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-
 import com.ctre.phoenix.sensors.Pigeon2;
 import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardComponent;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardContainer;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.Encoder;
 import com.ctre.phoenix.sensors.CANCoder;
-
-import java.nio.file.Path;
-import java.util.List;
 import java.util.function.DoubleSupplier;
 
+/**
+ * Nemesis Drivetrain for 2023
+ * @author Abhik Ray
+ */
 public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
 
     private static Drivetrain driveTrainInstance = null;
-    private double maxVoltage;
-    private double maxVelocity; // Meters per second
+    private double MAX_VELOCITY; // Meters per second
     private double maxAngularVelocity; // Angular Velocity of the drivetrain in radians    
     private Pigeon2 gyro;
     private final NemesisModule frontLeftModule;
@@ -60,14 +37,9 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     private final NemesisModule backLeftModule;
     private final NemesisModule backRightModule;
     private final HolonomicDriveController driveController;
-    private DoubleSupplier translationXSupp;
-    private DoubleSupplier translationYSupp;
-    private DoubleSupplier rotationSupp;
 
     private ChassisSpeeds driveSpeeds;
     private ChassisSpeeds pathfollowSpeeds;
-
-    private ShuffleboardTab mainTab;
   
     public static Drivetrain getDriveInstance(PowerDistribution pdp) {
         if (driveTrainInstance == null) {
@@ -95,24 +67,16 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
 
     
     public Drivetrain(PowerDistribution pdp) {
-        
-        ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
-        mainTab = Shuffleboard.getTab("Main");
         // constructor 
-        maxVoltage = 12;
-        maxVelocity = 6380.0 / 60.0 *
-        SdsModuleConfigurations.MK3_STANDARD.getDriveReduction() *
-        SdsModuleConfigurations.MK3_STANDARD.getWheelDiameter() * Math.PI;
-
-        maxAngularVelocity = maxVelocity / 
+        maxAngularVelocity = MAX_VELOCITY / 
         Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
         gyro = new Pigeon2(DRIVETRAIN_PIGEON_ID);
         driveSpeeds = new ChassisSpeeds(0.0,0.0,0.0);
         pathfollowSpeeds = new ChassisSpeeds(0.0,0.0,0.0);
         driveController = new HolonomicDriveController(
-            new PIDController(0.1, 0, 0), 
-            new PIDController(0.1, 0, 0), 
-            new ProfiledPIDController(0.2, 0,0, new Constraints(2, 0.2)
+            new PIDController(0.1, 0, 0), // TBD
+            new PIDController(0.1, 0, 0),  // TBD
+            new ProfiledPIDController(0.2, 0,0, new Constraints(2, 0.2) //TBD
         ));
         driveState = States.STOPPED;
         frontLeftModule = new NemesisModule(
@@ -120,17 +84,37 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             FRONT_LEFT_MODULE_DRIVE_MOTOR,
             FRONT_LEFT_MODULE_STEER_MOTOR,
             FRONT_LEFT_MODULE_STEER_ENCODER,
-            FRONT_LEFT_MODULE_DRIVE_MOTOR
+            FRONT_LEFT_MODULE_DRIVE_MOTOR,
+            "Front Left Module",
+            0
         );
         frontRightModule = new NemesisModule(
             GearRatio.STANDARD, 
             FRONT_RIGHT_MODULE_DRIVE_MOTOR, 
             FRONT_RIGHT_MODULE_STEER_MOTOR, 
             FRONT_RIGHT_MODULE_STEER_ENCODER, 
-            FRONT_RIGHT_MODULE_DRIVE_MOTOR
+            FRONT_RIGHT_MODULE_DRIVE_MOTOR,
+            "Front Right Module",
+            1
         );
-        backLeftModule = new NemesisModule(GearRatio.STANDARD, BACK_LEFT_MODULE_DRIVE_MOTOR, BACK_LEFT_MODULE_STEER_MOTOR, BACK_LEFT_MODULE_STEER_ENCODER, BACK_LEFT_MODULE_DRIVE_MOTOR);
-        backRightModule = new NemesisModule(GearRatio.STANDARD, BACK_RIGHT_MODULE_DRIVE_MOTOR, BACK_RIGHT_MODULE_STEER_MOTOR, BACK_RIGHT_MODULE_STEER_ENCODER, BACK_RIGHT_MODULE_DRIVE_MOTOR);
+        backLeftModule = new NemesisModule(
+            GearRatio.STANDARD,
+            BACK_LEFT_MODULE_DRIVE_MOTOR,
+            BACK_LEFT_MODULE_STEER_MOTOR,
+            BACK_LEFT_MODULE_STEER_ENCODER, 
+            BACK_LEFT_MODULE_DRIVE_MOTOR, 
+            "Back Left Module", 
+            2
+        );
+        backRightModule = new NemesisModule(
+            GearRatio.STANDARD,
+            BACK_RIGHT_MODULE_DRIVE_MOTOR,
+            BACK_RIGHT_MODULE_STEER_MOTOR,
+            BACK_RIGHT_MODULE_STEER_ENCODER, 
+            BACK_RIGHT_MODULE_DRIVE_MOTOR, 
+            "Back Right Module", 
+            3
+        );
         
         positions = new SwerveModulePosition[] 
             {frontLeftModule.getPosition(), frontRightModule.getPosition(), 
@@ -180,17 +164,32 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         }
         updateOdometry();
     }
+    /**
+     * Sets drivetrain speeds based on a desired position from Holonomic Controller
+     * @param desiredPosition
+     */
     public void followPath(State desiredPosition){
         ChassisSpeeds calculatedCommand = driveController.calculate(odometry.getPoseMeters(), desiredPosition, new Rotation2d(0));
         pathfollowSpeeds = calculatedCommand;
     }
-    public void updateOdometry(){
-        for( NemesisModule module : swerveMods){
-            module.update();
-        }
+    /**
+     * Updates each Swerve Module's Position
+     */
+    private void updateSwerveModules(){
+        for( NemesisModule module : swerveMods) module.update();
         positions = getSwervePositions();
+    }
+    /**
+     * Updates Robot's Odometry Position from Swerve Modules
+     */
+    public void updateOdometry(){
+        updateSwerveModules();
         odometry.update(getHeadingRot(),positions);
     }
+    /**
+     * Obtains Array of Positions from Each Swerve Module
+     * @return Array of Swerve Module Positions
+     */
     public SwerveModulePosition[] getSwervePositions(){
         return new SwerveModulePosition[]{
             frontLeftModule.getPosition(),
@@ -200,40 +199,60 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
 
         };
     }
-
+    /**
+     * Logs Odometry Readings to Shufflebaord 
+     * X, Y, Rotation (Odometry), Rotation (Gyro) 
+     */
     public void outputOdometry(){
         SmartDashboard.putNumber("X Odometry", odometry.getPoseMeters().getX());
         SmartDashboard.putNumber("Y Odometry", odometry.getPoseMeters().getY());
         SmartDashboard.putNumber("rotation Odometry", odometry.getPoseMeters().getRotation().getDegrees());
         SmartDashboard.putNumber("Rotation Gyro", gyro.getYaw());
-        // SmartDashboard.pu
     }
-
+    /**
+     * Converts Joystick input to Field Relative Drivetrain Command 
+     * @param leftx Left Joystick X Input (X Motion)
+     * @param lefty Left Joystick Y Input (Y Motion)
+     * @param rightx Right Joystick X Input (Turn)
+     */
     public void inputHandler(double leftx, double lefty, double rightx) {
         driveState = States.DRIVE;
-        double x = leftx * maxVelocity;
-        double y = lefty * maxVelocity;
+        double x = leftx * MAX_VELOCITY;
+        double y = lefty * MAX_VELOCITY;
         double angle = rightx * maxAngularVelocity;
         driveSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(x, y, angle, getHeadingRot());//jeevan and vidur contribution to this
-        System.out.println(driveSpeeds);
-        System.out.printf("X: %f Y: %f Angle: %f\n",x,y,angle); 
     }
+    /**
+     * Applies calculated velocities to each Swerve Module 
+     * @param speeds Desired speeds of each module
+     */
     public void drive(ChassisSpeeds speeds){
         states = swerveKinematics.toSwerveModuleStates(speeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, maxVelocity);
-        int i = 0;
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY);
         for(NemesisModule module : swerveMods){
-            module.set((states[i].speedMetersPerSecond / maxVelocity)* maxVoltage, states[i].angle.getRadians());
+            module.set(
+                (states[module.getID()].speedMetersPerSecond / MAX_VELOCITY)* MAX_VOLTAGE,  // Speed of current state, converted to voltage
+                states[module.getID()].angle.getRadians()); // Angle of coresponding state 
         }
     }
+    /**
+     * Reset Gyro
+     */
     public void zeroGyro() {
        gyro.setYaw(0);
-      }
+    }
+    /**
+     * Set Odometry to a particular starting pose 
+     * @param resetpose Starting Pose 
+     * @param modPositions Starting Module Positions 
+     */
     public void resetOdometry(Pose2d resetpose, SwerveModulePosition[] modPositions){
         for(NemesisModule module : swerveMods) module.reset();  
         odometry.resetPosition(getHeadingRot(),modPositions,resetpose);
-
     }
+    /**
+     * Set Encoder, Module, and Odometry Postiions to 0 
+     */
     public void resetEncoder(){
         // Resetting Encoders 
         for(CANCoder encoder : encoders)encoder.setPosition(0);
@@ -241,17 +260,27 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         resetOdometry(new Pose2d(0, 0, getHeadingRot()), positions);
         
     }
-    
+    /**
+     * @return Robot Heading in Degrees
+     */
     public double getHeading() {
-        // return new Rotation2d(gyro.getYaw()).getDegrees();
         return gyro.getYaw(); 
     }
+    /**
+     * @return Robot Heading as Rotation2d Object
+     */
     public Rotation2d getHeadingRot(){
         return Rotation2d.fromDegrees(gyro.getYaw());
     }
+    /**
+     * Set State to TRAJECTORY to follow paths 
+     */
     public void startAuton(){
         driveState = States.TRAJECTORY;
     }
+    /**
+     * Stop Drive Train
+     */
     public void stop(){
         driveState = States.STOPPED;
     }

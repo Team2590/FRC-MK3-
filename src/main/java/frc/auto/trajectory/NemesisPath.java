@@ -41,7 +41,6 @@ public class NemesisPath {
             System.out.println("STARTING PATH"+"reset encoders");
             drivetrain.resetEncoder();
             drivetrain.resetOdometry(path.getInitialPose(), drivetrain.getSwervePositions());
-        
             timer.reset();
             timer.start();
             isStarted = true;
