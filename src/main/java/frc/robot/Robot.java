@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.auto.AutoChooser;
 import frc.auto.routines.DriveSpin;
 import frc.looper.Looper;
+import frc.settings.FieldSettings;
 import frc.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import frc.util.NemesisJoystick;
@@ -23,11 +24,11 @@ import frc.util.NemesisJoystick;
  * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot implements FieldSettings {
 
   public static PowerDistribution pdp;
   public static Drivetrain drivetrain;
-  private Looper enabledLooper;
+  // private Looper enabledLooper;
   private NemesisJoystick leftStick;
   private NemesisJoystick rightStick;
   private AutoChooser chooser;
@@ -41,18 +42,26 @@ public class Robot extends TimedRobot {
 
     chooser = new AutoChooser(new DriveSpin());
 
-    enabledLooper = new Looper(0.02); 
-    enabledLooper.register(drivetrain::update);
-    enabledLooper.startLoops();
+    addPeriodic(() -> {
+      drivetrain.update();
+    }, REFRESH_RATE, 0.005);
 
-    leftStick = new NemesisJoystick(0, 0.10, 0.10);
+    // enabledLooper = new Looper(0.02); 
+    // enabledLooper.register(drivetrain::update);
+    // enabledLooper.startLoops();
+
+    leftStick = new NemesisJoystick(0, 0.1, 0.1);
     rightStick = new NemesisJoystick(1, 0.1, 0.1);
-    drivetrain.zeroGyro();
+    drivetrain.resetGyro();
     drivetrain.outputOdometry();
     drivetrain.resetEncoder();
 
-    // PathPlannerServer.startServer(2000);
+    PathPlannerServer.startServer(5811);
 
+  }
+  @Override
+  public void robotPeriodic(){
+    drivetrain.outputOdometry(); 
   }
 
   @Override
@@ -79,8 +88,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    drivetrain.inputHandler(-leftStick.getXBanded() / 3, leftStick.getYBanded() / 3, rightStick.getXBanded() / 3);
-    drivetrain.outputOdometry(); 
+    drivetrain.inputHandler(-leftStick.getYBanded() / 1, -leftStick.getXBanded() / 1, -rightStick.getXBanded() / 1.5);
 
   }
 
@@ -91,7 +99,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    drivetrain.outputOdometry();
 
   }
 

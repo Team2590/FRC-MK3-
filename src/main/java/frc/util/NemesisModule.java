@@ -12,7 +12,7 @@ public class NemesisModule implements SwerveModule{
     double distance;
     int id;
     // private ShuffleboardTab mainTab;
-    public NemesisModule(GearRatio gearRatio, int driveId, int steerId, int steerEncoder, double steerOffset, String name, int id){
+    public NemesisModule(GearRatio gearRatio, int driveId, int steerId, int steerEncoder, double steerOffset, String name, int moduleID){
         module = Mk3SwerveModuleHelper.createFalcon500( 
             Shuffleboard.getTab("Drivetrain").getLayout(name, BuiltInLayouts.kList)
                 .withSize(2,4)
@@ -26,7 +26,7 @@ public class NemesisModule implements SwerveModule{
             steerOffset
         );
         distance = 0;
-        id = 0;
+        id = moduleID;
     }
     // Inherited from Swerve Module 
     public double getDriveVelocity(){

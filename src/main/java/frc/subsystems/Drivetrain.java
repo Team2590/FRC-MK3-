@@ -29,9 +29,11 @@ import java.util.function.DoubleSupplier;
 public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
 
     private static Drivetrain driveTrainInstance = null;
-    private double MAX_VELOCITY; // Meters per second
+    // private double MAX_VELOCITY; // Meters per second
     private double maxAngularVelocity; // Angular Velocity of the drivetrain in radians    
     private Pigeon2 gyro;
+    private ProfiledPIDController levelController;
+    private ProfiledPIDController steerController;
     private final NemesisModule frontLeftModule;
     private final NemesisModule frontRightModule;
     private final NemesisModule backLeftModule;
@@ -40,6 +42,8 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
 
     private ChassisSpeeds driveSpeeds;
     private ChassisSpeeds pathfollowSpeeds;
+    private ChassisSpeeds levelSpeeds;
+    private ChassisSpeeds steerSpeed;
   
     public static Drivetrain getDriveInstance(PowerDistribution pdp) {
         if (driveTrainInstance == null) {
@@ -48,7 +52,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         return driveTrainInstance;
     }
     private enum States {
-        STOPPED, DRIVE, TRAJECTORY
+        STOPPED, DRIVE, TRAJECTORY, LEVELING, TARGETTING
     }
     private States driveState;
     private final SwerveDriveOdometry odometry;
@@ -78,13 +82,16 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             new PIDController(0.1, 0, 0),  // TBD
             new ProfiledPIDController(0.2, 0,0, new Constraints(2, 0.2) //TBD
         ));
+        levelController = new ProfiledPIDController(0.1, 0, 0, new Constraints(0.3, 0.1));
+        steerController = new ProfiledPIDController(0.1, 0, 0, new Constraints(0.5, 0.1));
+
         driveState = States.STOPPED;
         frontLeftModule = new NemesisModule(
             GearRatio.STANDARD, 
             FRONT_LEFT_MODULE_DRIVE_MOTOR,
             FRONT_LEFT_MODULE_STEER_MOTOR,
             FRONT_LEFT_MODULE_STEER_ENCODER,
-            FRONT_LEFT_MODULE_DRIVE_MOTOR,
+            FRONT_LEFT_MODULE_STEER_OFFSET,
             "Front Left Module",
             0
         );
@@ -93,7 +100,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             FRONT_RIGHT_MODULE_DRIVE_MOTOR, 
             FRONT_RIGHT_MODULE_STEER_MOTOR, 
             FRONT_RIGHT_MODULE_STEER_ENCODER, 
-            FRONT_RIGHT_MODULE_DRIVE_MOTOR,
+            FRONT_RIGHT_MODULE_STEER_OFFSET,
             "Front Right Module",
             1
         );
@@ -102,7 +109,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             BACK_LEFT_MODULE_DRIVE_MOTOR,
             BACK_LEFT_MODULE_STEER_MOTOR,
             BACK_LEFT_MODULE_STEER_ENCODER, 
-            BACK_LEFT_MODULE_DRIVE_MOTOR, 
+            BACK_LEFT_MODULE_STEER_OFFSET, 
             "Back Left Module", 
             2
         );
@@ -111,7 +118,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             BACK_RIGHT_MODULE_DRIVE_MOTOR,
             BACK_RIGHT_MODULE_STEER_MOTOR,
             BACK_RIGHT_MODULE_STEER_ENCODER, 
-            BACK_RIGHT_MODULE_DRIVE_MOTOR, 
+            BACK_RIGHT_MODULE_STEER_OFFSET, 
             "Back Right Module", 
             3
         );
@@ -156,6 +163,13 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             case STOPPED:                
                 drive(new ChassisSpeeds(0,0,0));
                 break;
+            case LEVELING:
+                drive(levelSpeeds);
+                break;
+            case TARGETTING:
+                // Rotation is controlled, speeds are independent 
+                drive(steerSpeed);
+                break;
             case TRAJECTORY:
                 System.out.println("IN TRAJECTORY");
                 drive(pathfollowSpeeds);
@@ -171,6 +185,13 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     public void followPath(State desiredPosition){
         ChassisSpeeds calculatedCommand = driveController.calculate(odometry.getPoseMeters(), desiredPosition, new Rotation2d(0));
         pathfollowSpeeds = calculatedCommand;
+    }
+    /**
+     * Switch the robot the leveling state and control position based off of Gyro Pitch 
+     */
+    public void autoLevel(){
+        driveState = States.LEVELING;
+        levelSpeeds = new ChassisSpeeds(levelController.calculate(gyro.getPitch(), 0),0,0);
     }
     /**
      * Updates each Swerve Module's Position
@@ -206,7 +227,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     public void outputOdometry(){
         SmartDashboard.putNumber("X Odometry", odometry.getPoseMeters().getX());
         SmartDashboard.putNumber("Y Odometry", odometry.getPoseMeters().getY());
-        SmartDashboard.putNumber("rotation Odometry", odometry.getPoseMeters().getRotation().getDegrees());
+        SmartDashboard.putNumber("Rotation Odometry", odometry.getPoseMeters().getRotation().getDegrees());
         SmartDashboard.putNumber("Rotation Gyro", gyro.getYaw());
     }
     /**
@@ -230,17 +251,38 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         states = swerveKinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY);
         for(NemesisModule module : swerveMods){
+            // System.out.println(module.getID());
             module.set(
                 (states[module.getID()].speedMetersPerSecond / MAX_VELOCITY)* MAX_VOLTAGE,  // Speed of current state, converted to voltage
-                states[module.getID()].angle.getRadians()); // Angle of coresponding state 
+                states[module.getID()].angle.getRadians() // Angle of coresponding state 
+            ); 
         }
     }
     /**
-     * Reset Gyro
+     * Input Handler while Locking onto a Vision Target
+     * @param leftx X Translation Field Relative
+     * @param lefty Y Translation Field Relative
+     * @param tx Angular Offset on X directions
      */
-    public void zeroGyro() {
-       gyro.setYaw(0);
+    public void inputHandlerTargetting(double leftx, double lefty, double tx){
+        driveState = States.TARGETTING;
+        double x = leftx * MAX_VELOCITY;
+        double y = lefty * MAX_VELOCITY;
+        double calculatedAngularCommand = steerController.calculate(tx,0) * maxAngularVelocity;
+        steerSpeed = ChassisSpeeds.fromFieldRelativeSpeeds(x, y, calculatedAngularCommand, getHeadingRot());//jeevan and vidur contribution to this
+
     }
+    /**
+     * Reset Gyro
+     * @param angle the angle the gyro will reset to
+     * @default Default value is 0
+     */
+    public void resetGyro(double angle) {
+       gyro.setYaw(angle);
+    }
+    public void resetGyro() {
+        gyro.setYaw(0);
+     }
     /**
      * Set Odometry to a particular starting pose 
      * @param resetpose Starting Pose 
