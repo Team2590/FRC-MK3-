@@ -8,6 +8,10 @@ import frc.robot.Robot;
 import frc.subsystems.Drivetrain;
 import frc.subsystems.DrivetrainSettings;
 
+/**
+ * Drive in an S path and Spin routine 
+ * @author Abhik Ray
+ */
 public class DriveSpin extends AutoRoutine implements DrivetrainSettings{
     NemesisPath forwardS = PathContainer.moveForward;
     NemesisPath reverseS = PathContainer.moveReverse;

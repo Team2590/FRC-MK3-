@@ -6,10 +6,12 @@ import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper.GearRatio;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import com.ctre.phoenix.sensors.Pigeon2;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -29,7 +31,8 @@ import java.util.function.DoubleSupplier;
 public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
 
     private static Drivetrain driveTrainInstance = null;
-    // private double MAX_VELOCITY; // Meters per second
+
+    private Timer timer;
     private double maxAngularVelocity; // Angular Velocity of the drivetrain in radians    
     private Pigeon2 gyro;
     private ProfiledPIDController levelController;
@@ -56,6 +59,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     }
     private States driveState;
     private final SwerveDriveOdometry odometry;
+    private final SwerveDrivePoseEstimator poseEstimator;
     private SwerveModuleState[] states;
     private SwerveModulePosition[] positions;
     CANCoder frontLeft;
@@ -72,6 +76,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     
     public Drivetrain(PowerDistribution pdp) {
         // constructor 
+        timer = new Timer();
         maxAngularVelocity = MAX_VELOCITY / 
         Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
         gyro = new Pigeon2(DRIVETRAIN_PIGEON_ID);
@@ -84,7 +89,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         ));
         levelController = new ProfiledPIDController(0.1, 0, 0, new Constraints(0.3, 0.1));
         steerController = new ProfiledPIDController(0.1, 0, 0, new Constraints(0.5, 0.1));
-
+        poseEstimator = new SwerveDrivePoseEstimator(swerveKinematics, getHeadingRot(), positions, new Pose2d(0,0, new Rotation2d()));
         driveState = States.STOPPED;
         frontLeftModule = new NemesisModule(
             GearRatio.STANDARD, 
@@ -176,7 +181,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
                 // PathContainer.moveForward.runPath(this);
                 break;
         }
-        updateOdometry();
+        updatePose();
     }
     /**
      * Sets drivetrain speeds based on a desired position from Holonomic Controller
@@ -203,9 +208,11 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     /**
      * Updates Robot's Odometry Position from Swerve Modules
      */
-    public void updateOdometry(){
+    public void updatePose(){
         updateSwerveModules();
         odometry.update(getHeadingRot(),positions);
+        poseEstimator.update(getHeadingRot(),positions);
+        poseEstimator.addVisionMeasurement(null, BACK_LEFT_MODULE_DRIVE_MOTOR, null);
     }
     /**
      * Obtains Array of Positions from Each Swerve Module

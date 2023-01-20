@@ -11,6 +11,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.settings.FieldSettings;
 
 /**
@@ -89,7 +90,7 @@ public class Limelight implements LimelightSettings, FieldSettings {
   // TODO: add javadocs
   // TODO: look at commands/subsystems (https://docs.wpilib.org/en/stable/docs/software/commandbased/index.html)
 
-  private Limelight() {
+  public Limelight() {
     var table = NetworkTableInstance.getDefault().getTable("limelight");
 
     pipelinePublisher = table.getDoubleTopic("pipeline").publish();
@@ -132,6 +133,13 @@ public class Limelight implements LimelightSettings, FieldSettings {
   }
   public boolean hasTarget() {
     return hasTarget;
+  }
+
+  public void outputShuffleboard(){
+    SmartDashboard.putBoolean("Limelight Has Target", hasTarget);
+    SmartDashboard.putNumber("April Tag Seen", aprilTagId);
+    SmartDashboard.putNumber("Limelight X", x);
+    SmartDashboard.putNumber("Limelight Y", y);
   }
 
   /**
