@@ -13,7 +13,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.wpilibj.Filesystem;
-import frc.subsystems.DrivetrainSettings;
+import frc.settings.DrivetrainSettings;
 
 public class PathContainer implements DrivetrainSettings{
 

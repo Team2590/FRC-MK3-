@@ -1,9 +1,12 @@
 package frc.util;
-import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
+// import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SwerveModule;
-import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper.GearRatio;
+// import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper.GearRatio;
+import frc.util.NemesisSDSWrapper.NemesisSwerveHelper.GearRatio;
+
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import frc.util.NemesisSDSWrapper.NemesisSwerveHelper;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
@@ -13,7 +16,7 @@ public class NemesisModule implements SwerveModule{
     int id;
     // private ShuffleboardTab mainTab;
     public NemesisModule(GearRatio gearRatio, int driveId, int steerId, int steerEncoder, double steerOffset, String name, int moduleID){
-        module = Mk3SwerveModuleHelper.createFalcon500( 
+        module = NemesisSwerveHelper.createFalcon500( 
             Shuffleboard.getTab("Drivetrain").getLayout(name, BuiltInLayouts.kList)
                 .withSize(2,4)
                 .withPosition(id*2,0),           

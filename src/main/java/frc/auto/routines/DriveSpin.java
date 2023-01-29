@@ -5,8 +5,8 @@ import frc.auto.AutoRoutine;
 import frc.auto.trajectory.NemesisPath;
 import frc.auto.trajectory.PathContainer;
 import frc.robot.Robot;
+import frc.settings.DrivetrainSettings;
 import frc.subsystems.Drivetrain;
-import frc.subsystems.DrivetrainSettings;
 
 /**
  * Drive in an S path and Spin routine 
@@ -35,7 +35,7 @@ public class DriveSpin extends AutoRoutine implements DrivetrainSettings{
     public void initialize() {
         System.out.println("INITALIAIRD");
         // TODO Auto-generated method stub
-        driveT = Robot.getDrivetrainInstance();
+        // driveT = Robot.getDrivetrainInstance();
         
     }
 

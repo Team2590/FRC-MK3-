@@ -1,8 +1,11 @@
 package frc.subsystems;
 
 import frc.robot.RobotMap;
+import frc.settings.DrivetrainSettings;
 import frc.util.NemesisModule;
-import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper.GearRatio;
+// import com.swervedrivespecialties.swervelib.Nemesis.GearRatio;
+// import frc.util.NemesisSDSWrapper.NemesisSwerveHelper;
+import frc.util.NemesisSDSWrapper.NemesisSwerveHelper.GearRatio;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -21,6 +24,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 import java.util.function.DoubleSupplier;
 
@@ -37,6 +42,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     private Pigeon2 gyro;
     private ProfiledPIDController levelController;
     private ProfiledPIDController steerController;
+    private ProfiledPIDController alignController;
     private final NemesisModule frontLeftModule;
     private final NemesisModule frontRightModule;
     private final NemesisModule backLeftModule;
@@ -47,6 +53,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     private ChassisSpeeds pathfollowSpeeds;
     private ChassisSpeeds levelSpeeds;
     private ChassisSpeeds steerSpeed;
+    private ChassisSpeeds alignSpeeds;
   
     public static Drivetrain getDriveInstance(PowerDistribution pdp) {
         if (driveTrainInstance == null) {
@@ -55,11 +62,12 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         return driveTrainInstance;
     }
     private enum States {
-        STOPPED, DRIVE, TRAJECTORY, LEVELING, TARGETTING
+        STOPPED, DRIVE, TRAJECTORY, LEVELING, TARGETTING,
+        ALIGNING
     }
     private States driveState;
     private final SwerveDriveOdometry odometry;
-    private final SwerveDrivePoseEstimator poseEstimator;
+    // private final SwerveDrivePoseEstimator poseEstimator;
     private SwerveModuleState[] states;
     private SwerveModulePosition[] positions;
     CANCoder frontLeft;
@@ -72,14 +80,13 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     public DoubleSupplier odometryX; 
     public DoubleSupplier odometryY; 
     public DoubleSupplier odometryRot;
-
     
     public Drivetrain(PowerDistribution pdp) {
         // constructor 
         timer = new Timer();
         maxAngularVelocity = MAX_VELOCITY / 
         Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
-        gyro = new Pigeon2(DRIVETRAIN_PIGEON_ID);
+        gyro = new Pigeon2(DRIVETRAIN_PIGEON_ID,CAN_BUS);
         driveSpeeds = new ChassisSpeeds(0.0,0.0,0.0);
         pathfollowSpeeds = new ChassisSpeeds(0.0,0.0,0.0);
         driveController = new HolonomicDriveController(
@@ -89,10 +96,11 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         ));
         levelController = new ProfiledPIDController(0.1, 0, 0, new Constraints(0.3, 0.1));
         steerController = new ProfiledPIDController(0.1, 0, 0, new Constraints(0.5, 0.1));
-        poseEstimator = new SwerveDrivePoseEstimator(swerveKinematics, getHeadingRot(), positions, new Pose2d(0,0, new Rotation2d()));
+        alignController = new ProfiledPIDController(0.1, 0, 0, new Constraints(0.5, 0.1));
+        // poseEstimator = new SwerveDrivePoseEstimator(swerveKinematics, getHeadingRot(), positions, new Pose2d(0,0, new Rotation2d()));
         driveState = States.STOPPED;
         frontLeftModule = new NemesisModule(
-            GearRatio.STANDARD, 
+            GearRatio.FAST, 
             FRONT_LEFT_MODULE_DRIVE_MOTOR,
             FRONT_LEFT_MODULE_STEER_MOTOR,
             FRONT_LEFT_MODULE_STEER_ENCODER,
@@ -101,7 +109,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             0
         );
         frontRightModule = new NemesisModule(
-            GearRatio.STANDARD, 
+            GearRatio.FAST, 
             FRONT_RIGHT_MODULE_DRIVE_MOTOR, 
             FRONT_RIGHT_MODULE_STEER_MOTOR, 
             FRONT_RIGHT_MODULE_STEER_ENCODER, 
@@ -110,7 +118,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             1
         );
         backLeftModule = new NemesisModule(
-            GearRatio.STANDARD,
+            GearRatio.FAST,
             BACK_LEFT_MODULE_DRIVE_MOTOR,
             BACK_LEFT_MODULE_STEER_MOTOR,
             BACK_LEFT_MODULE_STEER_ENCODER, 
@@ -119,7 +127,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             2
         );
         backRightModule = new NemesisModule(
-            GearRatio.STANDARD,
+            GearRatio.FAST,
             BACK_RIGHT_MODULE_DRIVE_MOTOR,
             BACK_RIGHT_MODULE_STEER_MOTOR,
             BACK_RIGHT_MODULE_STEER_ENCODER, 
@@ -152,10 +160,10 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             }
         };
 
-        frontLeft = new CANCoder(9);
-        frontRight = new CANCoder(10);
-        backLeft = new CANCoder(12);
-        backRight = new CANCoder(11);
+        frontLeft = new CANCoder(9,CAN_BUS);
+        frontRight = new CANCoder(10,CAN_BUS);
+        backLeft = new CANCoder(12,CAN_BUS);
+        backRight = new CANCoder(11,CAN_BUS);
         swerveMods = new NemesisModule[]{frontLeftModule, frontRightModule, backLeftModule, backRightModule};
         encoders = new CANCoder[]{frontLeft, frontRight, backLeft, backRight};
         
@@ -180,8 +188,16 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
                 drive(pathfollowSpeeds);
                 // PathContainer.moveForward.runPath(this);
                 break;
+            case ALIGNING: 
+                drive(alignSpeeds);
+                break; 
         }
         updatePose();
+    }
+    public void aligning(double xOffset){
+        driveState = States.ALIGNING;
+        alignSpeeds = new ChassisSpeeds(
+            alignController.calculate(xOffset,0),0,0);
     }
     /**
      * Sets drivetrain speeds based on a desired position from Holonomic Controller
@@ -211,8 +227,8 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     public void updatePose(){
         updateSwerveModules();
         odometry.update(getHeadingRot(),positions);
-        poseEstimator.update(getHeadingRot(),positions);
-        poseEstimator.addVisionMeasurement(null, BACK_LEFT_MODULE_DRIVE_MOTOR, null);
+        // poseEstimator.update(getHeadingRot(),positions);
+        // poseEstimator.addVisionMeasurement(null, BACK_LEFT_MODULE_DRIVE_MOTOR, null);
     }
     /**
      * Obtains Array of Positions from Each Swerve Module
@@ -236,6 +252,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         SmartDashboard.putNumber("Y Odometry", odometry.getPoseMeters().getY());
         SmartDashboard.putNumber("Rotation Odometry", odometry.getPoseMeters().getRotation().getDegrees());
         SmartDashboard.putNumber("Rotation Gyro", gyro.getYaw());
+        // SmartDashboard.putNumber("Gyro Z", gyro.get());
     }
     /**
      * Converts Joystick input to Field Relative Drivetrain Command 
@@ -248,6 +265,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         double x = leftx * MAX_VELOCITY;
         double y = lefty * MAX_VELOCITY;
         double angle = rightx * maxAngularVelocity;
+        System.out.println(angle);
         driveSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(x, y, angle, getHeadingRot());//jeevan and vidur contribution to this
     }
     /**
@@ -258,7 +276,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         states = swerveKinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY);
         for(NemesisModule module : swerveMods){
-            // System.out.println(module.getID());
+            // if(module.getID() == 0) System.out.println(states[module.getID()].angle.getDegrees());
             module.set(
                 (states[module.getID()].speedMetersPerSecond / MAX_VELOCITY)* MAX_VOLTAGE,  // Speed of current state, converted to voltage
                 states[module.getID()].angle.getRadians() // Angle of coresponding state 
