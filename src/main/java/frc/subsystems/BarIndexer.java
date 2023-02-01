@@ -1,5 +1,8 @@
 package frc.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
+
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -10,7 +13,7 @@ import frc.settings.BarIndexerSettings;
 
 public class BarIndexer implements RobotMap, Subsystem, BarIndexerSettings {
     
-    private Solenoid barSol;
+    private TalonFX barMotor;
 
     private static BarIndexer indexer = null;
     private enum States {
@@ -18,11 +21,10 @@ public class BarIndexer implements RobotMap, Subsystem, BarIndexerSettings {
     }
     private States indexState;
     private boolean indexSolStatus;
-
     public BarIndexer(PowerDistribution pdp){
         indexState = States.STOPPED;
         indexSolStatus = false;
-        barSol = new Solenoid(PneumaticsModuleType.CTREPCM, INDEXER_SOLENOID);
+        barMotor = new TalonFX(BAR_ID,CAN_BUS);
     }
     public static BarIndexer getIndexerInstance(PowerDistribution pdp) {
         if (indexer == null) {
@@ -34,10 +36,11 @@ public class BarIndexer implements RobotMap, Subsystem, BarIndexerSettings {
         switch(indexState){
             case ON:
                 SmartDashboard.putBoolean("Index status", indexSolStatus);
-                barSol.set(indexSolStatus);
+                barMotor.set(ControlMode.Position,2);
+                // barSol.set(indexSolStatus);
                 break;
             case STOPPED:
-                barSol.set(false);
+                // barSol.set(false);
                 break;
         }
     }

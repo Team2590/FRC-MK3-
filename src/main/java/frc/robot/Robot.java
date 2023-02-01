@@ -30,7 +30,7 @@ import frc.util.Limelight;
 public class Robot extends TimedRobot implements FieldSettings {
 
   public static PowerDistribution pdp;
-  // public static Drivetrain drivetrain;
+  public static Drivetrain drivetrain;
   // public static BarIndexer indexer;
   public static Suction suction;
 
@@ -48,15 +48,15 @@ public class Robot extends TimedRobot implements FieldSettings {
   @Override
   public void robotInit() {
     limelight= new Limelight();
-    // drivetrain = Drivetrain.getDriveInstance(pdp);
+    drivetrain = Drivetrain.getDriveInstance(pdp);
     // indexer = BarIndexer.getIndexerInstance(pdp);
-    suction = Suction.getSuctionInstance(pdp);
+    // suction = Suction.getSuctionInstance(pdp);
     chooser = new AutoChooser(new DriveSpin());
 
     addPeriodic(() -> {
-      // drivetrain.update();
-      // indexer.update();
-      suction.update();
+      drivetrain.update();
+      // indexer.update(); 
+      // suction.update();
       limelight.update();
     }, REFRESH_RATE, 0.005);
 
@@ -64,8 +64,8 @@ public class Robot extends TimedRobot implements FieldSettings {
     compressor = new Compressor(PneumaticsModuleType.CTREPCM);
     leftStick = new NemesisJoystick(0, 0.1, 0.1);
     rightStick = new NemesisJoystick(1, 0.1, 0.1);
-    // drivetrain.resetGyro();
-    // drivetrain.outputOdometry();
+    drivetrain.resetGyro();
+    drivetrain.outputOdometry();
     // drivetrain.resetEncoder();
 
     PathPlannerServer.startServer(5811);
@@ -73,12 +73,12 @@ public class Robot extends TimedRobot implements FieldSettings {
   }
   @Override
   public void robotPeriodic(){
-    // drivetrain.outputOdometry(); 
+    drivetrain.outputOdometry(); 
   }
 
   @Override
   public void autonomousInit() {
-    // drivetrain.startAuton();
+    drivetrain.startAuton();
 
     // pick Auto
     chooser.pickAuto("driveSpin");
@@ -98,24 +98,24 @@ public class Robot extends TimedRobot implements FieldSettings {
 
   @Override
   public void teleopPeriodic() {
-    // drivetrain.inputHandler(leftStick.getXBanded() / 2, leftStick.getYBanded() / 2, rightStick.getXBanded() / 2);
-    if(leftStick.getTriggerPressed()){
-      suction.liftToggle();
-    }
-    if(rightStick.getTriggerPressed()){
-      suction.succToggle(); 
-    }
-    // if(leftStick.getRawButtonPressed(3)){
-    //   indexer.toggleIndexer();
-    // }                                                     
-    if(rightStick.getRawButtonPressed(3)){
-      suction.thrustToggle();
-    }
+    drivetrain.inputHandler(leftStick.getYBanded() / 2, leftStick.getXBanded() / 2, rightStick.getXBanded() / 2);
+    // if(leftStick.getTriggerPressed()){
+    //   suction.liftToggle();
+    // }
+    // if(rightStick.getTriggerPressed()){
+    //   suction.succToggle(); 
+    // }
+    // // if(leftStick.getRawButtonPressed(3)){
+    // //   indexer.toggleIndexer();
+    // // }                                                     
+    // if(rightStick.getRawButtonPressed(3)){
+    //   suction.thrustToggle();
+    // }
   }
 
   @Override
   public void disabledInit() {
-    // drivetrain.stop();
+    drivetrain.stop();  
   }
 
   @Override
@@ -130,12 +130,12 @@ public class Robot extends TimedRobot implements FieldSettings {
   @Override
   public void testPeriodic() {}
 
-  // public static Drivetrain getDrivetrainInstance(){
-  //   return drivetrain;
-  // }
-  public static Suction getSuctionInstance(){
-    return suction;
+  public static Drivetrain getDrivetrainInstance(){
+    return drivetrain;
   }
+  // public static Suction getSuctionInstance(){
+  //   return suction;
+  // }
   // public static BarIndexer getIndexerInstance(){
   //   return indexer;
   // }

@@ -49,7 +49,7 @@ public interface DrivetrainSettings {
     public static final double MAX_VOLTAGE = 12;
 
     public static final double MAX_VELOCITY = 
-        5880.0 / 60.0 / 
+        6300.0 / 60.0 / 
         SdsModuleConfigurations.MK4_L2.getDriveReduction() * 
         SdsModuleConfigurations.MK4_L2.getWheelDiameter() * Math.PI;
 

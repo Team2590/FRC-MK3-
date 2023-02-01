@@ -1,7 +1,7 @@
 package frc.util;
-// import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
+// import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SwerveModule;
-// import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper.GearRatio;
+// import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper.GearRatio;
 import frc.util.NemesisSDSWrapper.NemesisSwerveHelper.GearRatio;
 
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
@@ -43,7 +43,7 @@ public class NemesisModule implements SwerveModule{
     };
     public void update(){
         // distance = integral of velocity
-        distance += getDriveVelocity() * 0.02;
+        distance += getDriveVelocity() * 0.01;
     }
     public void reset(){
         distance = 0;

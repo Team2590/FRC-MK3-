@@ -2,6 +2,7 @@
 package frc.util.NemesisSDSWrapper;
 
 import com.swervedrivespecialties.swervelib.DriveControllerFactory;
+import com.swervedrivespecialties.swervelib.Mk4ModuleConfiguration;
 // import com.swervedrivespecialties.swervelib.Mk4ModuleConfiguration;
 import com.swervedrivespecialties.swervelib.Mk4ModuleConfiguration;
 import com.swervedrivespecialties.swervelib.ModuleConfiguration;
@@ -54,7 +55,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses Falcon 500s for driving and steering.
+     * Creates a Mk4 swerve module that uses Falcon 500s for driving and steering.
      * Module information is displayed in the specified ShuffleBoard container.
      *
      * @param container        The container to display module information in.
@@ -90,7 +91,7 @@ public final class NemesisSwerveHelper {
     }
 
     /**
-     * Creates a Mk3 swerve module that uses Falcon 500s for driving and steering.
+     * Creates a Mk4 swerve module that uses Falcon 500s for driving and steering.
      * Module information is displayed in the specified ShuffleBoard container.
      *
      * @param container        The container to display module information in.
@@ -113,7 +114,7 @@ public final class NemesisSwerveHelper {
     }
 
     /**
-     * Creates a Mk3 swerve module that uses Falcon 500s for driving and steering.
+     * Creates a Mk4 swerve module that uses Falcon 500s for driving and steering.
      *
      * @param configuration    Module configuration parameters to use.
      * @param gearRatio        The gearing configuration the module is in.
@@ -145,7 +146,7 @@ public final class NemesisSwerveHelper {
     }
 
     /**
-     * Creates a Mk3 swerve module that uses Falcon 500s for driving and steering.
+     * Creates a Mk4 swerve module that uses Falcon 500s for driving and steering.
      *
      * @param gearRatio        The gearing configuration the module is in.
      * @param driveMotorPort   The CAN ID of the drive Falcon 500.
@@ -165,7 +166,7 @@ public final class NemesisSwerveHelper {
     }
 
     /**
-     * Creates a Mk3 swerve module that uses NEOs for driving and steering.
+     * Creates a Mk4 swerve module that uses NEOs for driving and steering.
      * Module information is displayed in the specified ShuffleBoard container.
      *
      * @param container        The container to display module information in.
@@ -201,7 +202,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses NEOs for driving and steering.
+     * Creates a Mk4 swerve module that uses NEOs for driving and steering.
      * Module information is displayed in the specified ShuffleBoard container.
      *
      * @param container        The container to display module information in.
@@ -224,7 +225,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses NEOs for driving and steering.
+     * Creates a Mk4 swerve module that uses NEOs for driving and steering.
      *
      * @param configuration    Module configuration parameters to use.
      * @param gearRatio        The gearing configuration the module is in.
@@ -256,7 +257,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses NEOs for driving and steering.
+     * Creates a Mk4 swerve module that uses NEOs for driving and steering.
      *
      * @param gearRatio        The gearing configuration the module is in.
      * @param driveMotorPort   The CAN ID of the drive NEO.
@@ -276,7 +277,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses a Falcon 500 for driving and a NEO for steering.
+     * Creates a Mk4 swerve module that uses a Falcon 500 for driving and a NEO for steering.
      * Module information is displayed in the specified ShuffleBoard container.
      *
      * @param container        The container to display module information in.
@@ -312,7 +313,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses a Falcon 500 for driving and a NEO for steering.
+     * Creates a Mk4 swerve module that uses a Falcon 500 for driving and a NEO for steering.
      * Module information is displayed in the specified ShuffleBoard container.
      *
      * @param container        The container to display module information in.
@@ -335,7 +336,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses a Falcon 500 for driving and a NEO for steering.
+     * Creates a Mk4 swerve module that uses a Falcon 500 for driving and a NEO for steering.
      *
      * @param configuration    Module configuration parameters to use.
      * @param gearRatio        The gearing configuration the module is in.
@@ -367,7 +368,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses a Falcon 500 for driving and a NEO for steering.
+     * Creates a Mk4 swerve module that uses a Falcon 500 for driving and a NEO for steering.
      *
      * @param gearRatio        The gearing configuration the module is in.
      * @param driveMotorPort   The CAN ID of the drive Falcon 500.
@@ -387,7 +388,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses a NEO for driving and a Falcon 500 for steering.
+     * Creates a Mk4 swerve module that uses a NEO for driving and a Falcon 500 for steering.
      * Module information is displayed in the specified ShuffleBoard container.
      *
      * @param container        The container to display module information in.
@@ -423,7 +424,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses a NEO for driving and a Falcon 500 for steering.
+     * Creates a Mk4 swerve module that uses a NEO for driving and a Falcon 500 for steering.
      * Module information is displayed in the specified ShuffleBoard container.
      *
      * @param container        The container to display module information in.
@@ -446,7 +447,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses a NEO for driving and a Falcon 500 for steering.
+     * Creates a Mk4 swerve module that uses a NEO for driving and a Falcon 500 for steering.
      *
      * @param configuration    Module configuration parameters to use.
      * @param gearRatio        The gearing configuration the module is in.
@@ -478,7 +479,7 @@ public final class NemesisSwerveHelper {
     // }
 
     /**
-     * Creates a Mk3 swerve module that uses a NEO for driving and a Falcon 500 for steering.
+     * Creates a Mk4 swerve module that uses a NEO for driving and a Falcon 500 for steering.
      *
      * @param gearRatio        The gearing configuration the module is in.
      * @param driveMotorPort   The CAN ID of the drive NEO.
@@ -499,11 +500,11 @@ public final class NemesisSwerveHelper {
 
     public enum GearRatio {
         /**
-         * Mk3 swerve in the standard gear configuration.
+         * Mk4 swerve in the standard gear configuration.
          */
-        STANDARD(SdsModuleConfigurations.MK4_L1),
+        STANDARD(SdsModuleConfigurations.MK3_STANDARD),
         /**
-         * Mk3 swerve in the fast gear configuration.
+         * Mk4 swerve in the fast gear configuration.
          */
         FAST(SdsModuleConfigurations.MK4_L2);
 

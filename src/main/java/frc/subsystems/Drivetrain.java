@@ -265,7 +265,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         double x = leftx * MAX_VELOCITY;
         double y = lefty * MAX_VELOCITY;
         double angle = rightx * maxAngularVelocity;
-        System.out.println(angle);
+        // System.out.println(angle);
         driveSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(x, y, angle, getHeadingRot());//jeevan and vidur contribution to this
     }
     /**

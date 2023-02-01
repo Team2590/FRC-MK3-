@@ -31,9 +31,10 @@ public class NemesisCANCoderBuilder implements RobotMap{
         return configuration -> {
             CANCoderConfiguration config = new CANCoderConfiguration();
             config.absoluteSensorRange = AbsoluteSensorRange.Unsigned_0_to_360;
+            System.out.println("BUILDING A NEW CANCODER AND APPLYING THE OFFSET OF " + configuration.getOffset());
             config.magnetOffsetDegrees = Math.toDegrees(configuration.getOffset());
             config.sensorDirection = direction == Direction.CLOCKWISE;
-            config.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
+            // config.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
 
             CANCoder encoder = new CANCoder(configuration.getId(), CAN_BUS);
             CtreUtils.checkCtreError(encoder.configAllSettings(config, 250), "Failed to configure CANCoder");

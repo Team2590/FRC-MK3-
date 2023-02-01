@@ -1,5 +1,8 @@
 package frc.subsystems;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -17,6 +20,9 @@ public class Suction implements RobotMap, Subsystem, SuctionSettings {
     private boolean suctionStatus;
     private boolean liftStatus;
     private boolean thrustStatus;
+    private double vacuumPower = 0.3;
+
+    private CANSparkMax vacuum;
 
     private static Suction succ = null;
     private enum States {
@@ -34,6 +40,7 @@ public class Suction implements RobotMap, Subsystem, SuctionSettings {
         switch(suctionState){
             case ON:
                 outputSucc();  
+                vacuum.set(vacuumPower);
                 suctionSol.set(suctionStatus);
                 liftSol.set(liftStatus);
                 thrustSol.set(thrustStatus);
@@ -56,6 +63,7 @@ public class Suction implements RobotMap, Subsystem, SuctionSettings {
     public void succToggle(){
         suctionState = States.ON;
         suctionStatus = !suctionStatus;
+        vacuumPower = suctionStatus ? SUCC_SPEED:0;
     }
     public void thrustToggle(){
         suctionState = States.ON;
@@ -69,6 +77,7 @@ public class Suction implements RobotMap, Subsystem, SuctionSettings {
         suctionSol = new Solenoid(PneumaticsModuleType.CTREPCM, SUCTION_SOLENOID_ID);
         liftSol = new Solenoid(PneumaticsModuleType.CTREPCM, LIFT_SOLENOID_ID);
         thrustSol = new Solenoid(PneumaticsModuleType.CTREPCM, IN_OUT);
+        vacuum = new CANSparkMax(VACUUM_ID, MotorType.kBrushless);
         liftStatus = false;
         suctionStatus = false;
         thrustStatus = false;

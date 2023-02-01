@@ -9,7 +9,8 @@ public interface SuctionSettings {
     public static final int SUCTION_SOLENOID_ID = 0; // FIXME Measure and set wheelbase
     public static final int LIFT_SOLENOID_ID = 2; // FIXME Measure and set wheelbase
     public static final int IN_OUT = 1; // FIXME Measure and set wheelbase
-
+    public static final int VACUUM_ID = 14;
+    public static final double SUCC_SPEED = 0.3;
     // public static final int DRIVETRAIN_PIGEON_ID = 13; // FIXME Set Pigeon ID
 
     // public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 2; // FIXME Set front left module drive motor ID

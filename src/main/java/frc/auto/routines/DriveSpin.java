@@ -13,9 +13,9 @@ import frc.subsystems.Drivetrain;
  * @author Abhik Ray
  */
 public class DriveSpin extends AutoRoutine implements DrivetrainSettings{
-    NemesisPath forwardS = PathContainer.moveForward;
-    NemesisPath reverseS = PathContainer.moveReverse;
-    NemesisPath spin = PathContainer.spinInPlace;
+    // NemesisPath forwardS = PathContainer.moveForward;
+    // NemesisPath reverseS = PathContainer.moveReverse;
+    // NemesisPath spin = PathContainer.spinInPlace;
     Drivetrain driveT;
     private enum States {
         S_MOVEMENT, SPIN, RETURN, CIRCLE, END 
@@ -43,29 +43,29 @@ public class DriveSpin extends AutoRoutine implements DrivetrainSettings{
     public void update() {
         // TODO Auto-generated method stub
         switch(autoState){
-            case S_MOVEMENT:
-                forwardS.runPath(driveT);
-                if(forwardS.getIsFinished()){
-                    autoState = States.SPIN;
-                }
-                break;
-            case SPIN:
-                spin.runPath(driveT);
-                if(spin.getIsFinished()){
-                    autoState = States.RETURN;
-                }
-                break;
-            case RETURN:
-                reverseS.runPath(driveT);
-                if(reverseS.getIsFinished()){
-                    autoState = States.END;
-                }
-                break;
-            case CIRCLE:
-                break;
-            case END:
-                System.out.println("done!");
-                break;
+            // case S_MOVEMENT:
+            //     forwardS.runPath(driveT);
+            //     if(forwardS.getIsFinished()){
+            //         autoState = States.SPIN;
+            //     }
+            //     break;
+            // case SPIN:
+            //     spin.runPath(driveT);
+            //     if(spin.getIsFinished()){
+            //         autoState = States.RETURN;
+            //     }
+            //     break;
+            // case RETURN:
+            //     reverseS.runPath(driveT);
+            //     if(reverseS.getIsFinished()){
+            //         autoState = States.END;
+            //     }
+            //     break;
+            // case CIRCLE:
+            //     break;
+            // case END:
+            //     System.out.println("done!");
+            //     break;
 
 
         }
