@@ -1,7 +1,7 @@
 package frc.util;
-// import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
+// import com.swervedrivespecialties.swervelib.MK3SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SwerveModule;
-// import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper.GearRatio;
+// import com.swervedrivespecialties.swervelib.MK3SwerveModuleHelper.GearRatio;
 import frc.util.NemesisSDSWrapper.NemesisSwerveHelper.GearRatio;
 
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;

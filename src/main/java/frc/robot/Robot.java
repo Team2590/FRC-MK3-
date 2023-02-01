@@ -50,13 +50,13 @@ public class Robot extends TimedRobot implements FieldSettings {
     limelight= new Limelight();
     drivetrain = Drivetrain.getDriveInstance(pdp);
     // indexer = BarIndexer.getIndexerInstance(pdp);
-    // suction = Suction.getSuctionInstance(pdp);
+    suction = Suction.getSuctionInstance(pdp);
     chooser = new AutoChooser(new DriveSpin());
 
     addPeriodic(() -> {
       drivetrain.update();
       // indexer.update(); 
-      // suction.update();
+      suction.update();
       limelight.update();
     }, REFRESH_RATE, 0.005);
 
@@ -99,18 +99,22 @@ public class Robot extends TimedRobot implements FieldSettings {
   @Override
   public void teleopPeriodic() {
     drivetrain.inputHandler(leftStick.getYBanded() / 2, leftStick.getXBanded() / 2, rightStick.getXBanded() / 2);
-    // if(leftStick.getTriggerPressed()){
-    //   suction.liftToggle();
-    // }
-    // if(rightStick.getTriggerPressed()){
-    //   suction.succToggle(); 
-    // }
-    // // if(leftStick.getRawButtonPressed(3)){
-    // //   indexer.toggleIndexer();
-    // // }                                                     
-    // if(rightStick.getRawButtonPressed(3)){
-    //   suction.thrustToggle();
-    // }
+    if(leftStick.getTriggerPressed()){
+      suction.liftToggle();
+    }
+    if(rightStick.getTriggerPressed()){
+      suction.succToggle(); 
+    }
+    // if(leftStick.getPOV() == 0){
+    //   indexer.setPower(0.3);
+    // } else if(leftStick.getPOV() == 180){
+    //   indexer.setPower(-0.3);
+    // } else {
+    //   indexer.setPower(0);
+    // }                                                     
+    if(rightStick.getRawButtonPressed(3)){
+      suction.thrustToggle();
+    }
   }
 
   @Override
@@ -133,9 +137,9 @@ public class Robot extends TimedRobot implements FieldSettings {
   public static Drivetrain getDrivetrainInstance(){
     return drivetrain;
   }
-  // public static Suction getSuctionInstance(){
-  //   return suction;
-  // }
+  public static Suction getSuctionInstance(){
+    return suction;
+  }
   // public static BarIndexer getIndexerInstance(){
   //   return indexer;
   // }

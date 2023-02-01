@@ -100,7 +100,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         // poseEstimator = new SwerveDrivePoseEstimator(swerveKinematics, getHeadingRot(), positions, new Pose2d(0,0, new Rotation2d()));
         driveState = States.STOPPED;
         frontLeftModule = new NemesisModule(
-            GearRatio.FAST, 
+            GearRatio.STANDARD, 
             FRONT_LEFT_MODULE_DRIVE_MOTOR,
             FRONT_LEFT_MODULE_STEER_MOTOR,
             FRONT_LEFT_MODULE_STEER_ENCODER,
@@ -109,7 +109,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             0
         );
         frontRightModule = new NemesisModule(
-            GearRatio.FAST, 
+            GearRatio.STANDARD, 
             FRONT_RIGHT_MODULE_DRIVE_MOTOR, 
             FRONT_RIGHT_MODULE_STEER_MOTOR, 
             FRONT_RIGHT_MODULE_STEER_ENCODER, 
@@ -118,7 +118,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             1
         );
         backLeftModule = new NemesisModule(
-            GearRatio.FAST,
+            GearRatio.STANDARD,
             BACK_LEFT_MODULE_DRIVE_MOTOR,
             BACK_LEFT_MODULE_STEER_MOTOR,
             BACK_LEFT_MODULE_STEER_ENCODER, 
@@ -127,7 +127,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             2
         );
         backRightModule = new NemesisModule(
-            GearRatio.FAST,
+            GearRatio.STANDARD,
             BACK_RIGHT_MODULE_DRIVE_MOTOR,
             BACK_RIGHT_MODULE_STEER_MOTOR,
             BACK_RIGHT_MODULE_STEER_ENCODER, 

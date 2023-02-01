@@ -20,7 +20,7 @@ public class Suction implements RobotMap, Subsystem, SuctionSettings {
     private boolean suctionStatus;
     private boolean liftStatus;
     private boolean thrustStatus;
-    private double vacuumPower = 0.3;
+    private double vacuumPower = 0.5;
 
     private CANSparkMax vacuum;
 
@@ -46,6 +46,7 @@ public class Suction implements RobotMap, Subsystem, SuctionSettings {
                 thrustSol.set(thrustStatus);
                 break;
             case STOPPED:
+                vacuum.set(0);
                 suctionSol.set(false);
                 liftSol.set(false);
                 thrustSol.set(false);

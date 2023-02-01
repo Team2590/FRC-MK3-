@@ -153,7 +153,7 @@ public final class NemesisSteerFactoryBuilder implements RobotMap {
 
 
     private static class ControllerImplementation implements SteerController {
-        private static final int ENCODER_RESET_ITERATIONS = 5;
+        private static final int ENCODER_RESET_ITERATIONS = 200;
         private static final double ENCODER_RESET_MAX_ANGULAR_VELOCITY = Math.toRadians(0.5);
 
         private final TalonFX motor;
