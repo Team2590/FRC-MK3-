@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.auto.AutoChooser;
 import frc.auto.routines.CommunityPlacement;
 import frc.auto.routines.DriveSpin;
-import frc.auto.routines.place_balance;
+import frc.auto.routines.CommunityPlacement;
 import frc.looper.Looper;
 import frc.settings.FieldSettings;
 import frc.subsystems.BarIndexer;
@@ -23,7 +23,7 @@ import frc.subsystems.Drivetrain;
 import frc.subsystems.Suction;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import frc.util.NemesisJoystick;
-import frc.util.GridReader;
+// import frc.util.GridReader;
 import frc.util.Limelight;
 
 /**
@@ -43,7 +43,7 @@ public class Robot extends TimedRobot implements FieldSettings {
   private NemesisJoystick rightStick;
   private AutoChooser chooser;
   private Limelight limelight_top, limelight_bottom;
-  private GridReader reader;
+  // private GridReader reader;
 
   /**
    * This function is run when the robot is first started up and should be used for any

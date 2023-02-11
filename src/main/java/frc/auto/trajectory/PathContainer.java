@@ -17,7 +17,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.wpilibj.Filesystem;
-import frc.auto.routines.automatic_choice;
+import frc.auto.routines.CommunityPlacement;
 import frc.settings.DrivetrainSettings;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 import com.pathplanner.lib.PathPlannerTrajectory;
