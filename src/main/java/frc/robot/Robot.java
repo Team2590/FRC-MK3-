@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.auto.AutoChooser;
 import frc.auto.routines.DriveSpin;
+import frc.auto.routines.place_balance;
 import frc.looper.Looper;
 import frc.settings.FieldSettings;
 import frc.subsystems.BarIndexer;
@@ -21,6 +22,7 @@ import frc.subsystems.Drivetrain;
 import frc.subsystems.Suction;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import frc.util.NemesisJoystick;
+import frc.util.GridReader;
 import frc.util.Limelight;
 
 /**
@@ -31,7 +33,7 @@ public class Robot extends TimedRobot implements FieldSettings {
 
   public static PowerDistribution pdp;
   public static Drivetrain drivetrain;
-  // public static BarIndexer indexer;
+  public static BarIndexer indexer;
   public static Suction suction;
 
   public static Compressor compressor;
@@ -39,7 +41,8 @@ public class Robot extends TimedRobot implements FieldSettings {
   private NemesisJoystick leftStick;
   private NemesisJoystick rightStick;
   private AutoChooser chooser;
-  private Limelight limelight;
+  private Limelight limelight_top, limelight_bottom;
+  private GridReader reader;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -47,17 +50,21 @@ public class Robot extends TimedRobot implements FieldSettings {
    */
   @Override
   public void robotInit() {
-    limelight= new Limelight();
+    limelight_top= new Limelight("limelight_top");
+    limelight_bottom= new Limelight("limelight_bottom");
     drivetrain = Drivetrain.getDriveInstance(pdp);
     // indexer = BarIndexer.getIndexerInstance(pdp);
-    suction = Suction.getSuctionInstance(pdp);
+     suction = Suction.getSuctionInstance(pdp);
+    chooser = new AutoChooser(new place_balance());
+    // suction = Suction.getSuctionInstance(pdp);
     chooser = new AutoChooser(new DriveSpin());
+    reader = new GridReader();
 
     addPeriodic(() -> {
       drivetrain.update();
       // indexer.update(); 
-      suction.update();
-      limelight.update();
+      // suction.update();
+      limelight_bottom.update();
     }, REFRESH_RATE, 0.005);
 
    
@@ -68,12 +75,13 @@ public class Robot extends TimedRobot implements FieldSettings {
     drivetrain.outputOdometry();
     // drivetrain.resetEncoder();
 
-    PathPlannerServer.startServer(5811);
+    PathPlannerServer.startServer(2590);
 
   }
   @Override
   public void robotPeriodic(){
     drivetrain.outputOdometry(); 
+    //limelight.outputShuffleboard();
   }
 
   @Override
@@ -81,7 +89,7 @@ public class Robot extends TimedRobot implements FieldSettings {
     drivetrain.startAuton();
 
     // pick Auto
-    chooser.pickAuto("driveSpin");
+    chooser.pickAuto("Community_Placement");
     chooser.initializeAuto();   
   }
 
@@ -98,23 +106,29 @@ public class Robot extends TimedRobot implements FieldSettings {
 
   @Override
   public void teleopPeriodic() {
-    drivetrain.inputHandler(leftStick.getYBanded() / 2, leftStick.getXBanded() / 2, rightStick.getXBanded() / 2);
-    if(leftStick.getTriggerPressed()){
-      suction.liftToggle();
+    if(leftStick.getTrigger()){
+      drivetrain.aligning(limelight_top.getX());
+    } else if(rightStick.getTrigger()){
+      drivetrain.autoLevel();
     }
-    if(rightStick.getTriggerPressed()){
-      suction.succToggle(); 
+    else {
+      drivetrain.inputHandler(leftStick.getYBanded() /2, leftStick.getXBanded() /2, rightStick.getXBanded() / 1.5);
     }
-    // if(leftStick.getPOV() == 0){
-    //   indexer.setPower(0.3);
-    // } else if(leftStick.getPOV() == 180){
-    //   indexer.setPower(-0.3);
-    // } else {
-    //   indexer.setPower(0);
-    // }                                                     
-    if(rightStick.getRawButtonPressed(3)){
-      suction.thrustToggle();
+    if(leftStick.getRawButtonPressed(4)){
+      reader.findConeTarget();
     }
+    // if(leftStick.getTriggerPressed()){
+    //   suction.liftToggle();
+    // }
+    // if(rightStick.getTriggerPressed()){
+    //   suction.succToggle(); 
+    // }
+    // // if(leftStick.getRawButtonPressed(3)){
+    // //   indexer.toggleIndexer();
+    // // }                                                     
+    // if(rightStick.getRawButtonPressed(3)){
+    //   suction.thrustToggle();
+    // }
   }
 
   @Override
@@ -140,7 +154,7 @@ public class Robot extends TimedRobot implements FieldSettings {
   public static Suction getSuctionInstance(){
     return suction;
   }
-  // public static BarIndexer getIndexerInstance(){
-  //   return indexer;
-  // }
+  public static BarIndexer getIndexerInstance(){
+    return indexer;
+  }
 }
