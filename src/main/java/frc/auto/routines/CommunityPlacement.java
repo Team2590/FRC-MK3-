@@ -23,7 +23,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
 
     Drivetrain driveT;
     Suction suction;
-    Limelight lime;
+    // Limelight lime;
     double x_offset;
     BarIndexer bar;
     private double time;
@@ -33,7 +33,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
     
     public States autoState;
     public CommunityPlacement(){
-        autoState = States.ALIGN;
+        autoState = States.FIRST_MOVE;
     }
     
     private int pathPart;
@@ -51,7 +51,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
         // TODO Auto-generated method stub
         driveT = Robot.getDrivetrainInstance();
         suction=Robot.getSuctionInstance();
-        lime=new Limelight("limelight_low");
+        // lime=new Limelight("limelight_low");
        // suction.succToggle();
         pathPart=0;
         //bar=Robot.getIndexerInstance();
@@ -63,7 +63,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
     public void update() {
         // TODO Auto-generated method stub
         time=CommunityPlacement.getTime();
-        lime.update();
+        // lime.update();
         driveT.update();
        // bar.update();
        // suction.update();
@@ -71,7 +71,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
         
         
 
-        double x_offset=lime.getDistance();
+        // double x_offset=lime.getDistance();
 
         levelError=driveT.getLevelEror();
         switch(autoState){
