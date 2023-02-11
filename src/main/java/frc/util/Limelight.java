@@ -29,8 +29,11 @@ public class Limelight implements LimelightSettings {
 
   private static Limelight instance = null;
 
-  public static Limelight getInstance() {
-    return instance == null ? instance = new Limelight() : instance;
+  public static Limelight getTopInstance() {
+    return instance == null ? instance = new Limelight("limelight_top") : instance;
+  }
+  public static Limelight getBottomInstnace(){
+    return instance == null ? instance = new Limelight("limelight_bottom") : instance;
   }
 
   //~~~~~~ HAS TARGET ~~~~~~

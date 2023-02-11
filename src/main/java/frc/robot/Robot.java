@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.auto.AutoChooser;
+import frc.auto.routines.CommunityPlacement;
 import frc.auto.routines.DriveSpin;
 import frc.auto.routines.place_balance;
 import frc.looper.Looper;
@@ -55,10 +56,10 @@ public class Robot extends TimedRobot implements FieldSettings {
     drivetrain = Drivetrain.getDriveInstance(pdp);
     // indexer = BarIndexer.getIndexerInstance(pdp);
      suction = Suction.getSuctionInstance(pdp);
-    chooser = new AutoChooser(new place_balance());
+    chooser = new AutoChooser(new CommunityPlacement());
     // suction = Suction.getSuctionInstance(pdp);
     chooser = new AutoChooser(new DriveSpin());
-    reader = new GridReader();
+    // reader = new GridReader();
 
     addPeriodic(() -> {
       drivetrain.update();
@@ -115,7 +116,7 @@ public class Robot extends TimedRobot implements FieldSettings {
       drivetrain.inputHandler(leftStick.getYBanded() /2, leftStick.getXBanded() /2, rightStick.getXBanded() / 1.5);
     }
     if(leftStick.getRawButtonPressed(4)){
-      reader.findConeTarget();
+      // reader.findConeTarget();
     }
     // if(leftStick.getTriggerPressed()){
     //   suction.liftToggle();

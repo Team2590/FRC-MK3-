@@ -75,7 +75,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     private ChassisSpeeds steerSpeed;
     private ChassisSpeeds alignSpeeds;
     private double levelError;
-    private Limelight lime;
+    private Limelight limeTop, limeBottom;
 
     private NemesisPath onTheFlyPath;
   
@@ -194,7 +194,8 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         backRight = new CANCoder(11,CAN_BUS);
         swerveMods = new NemesisModule[]{frontLeftModule, frontRightModule, backLeftModule, backRightModule};
         encoders = new CANCoder[]{frontLeft, frontRight, backLeft, backRight};
-        lime=new Limelight();
+        limeTop=new Limelight("limelight_top");
+        limeBottom=new Limelight("limelight_bottom");
         
     }
     public void update(){
@@ -379,7 +380,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
 
      public void setVisionMatrices(){
 
-        if(/*Math.sqrt( (Math.pow(poseEstimator.getEstimatedPosition().getX(),2) ) + (Math.pow(poseEstimator.getEstimatedPosition().getY(),2)))*/lime.getDeltaDistance() >=1){
+        if(/*Math.sqrt( (Math.pow(poseEstimator.getEstimatedPosition().getX(),2) ) + (Math.pow(poseEstimator.getEstimatedPosition().getY(),2)))*/limeBottom.getDeltaDistance() >=1){
             poseEstimator.setVisionMeasurementStdDevs(new MatBuilder<>(Nat.N3(),Nat.N1()).fill(.1,.1,.01)
 
 

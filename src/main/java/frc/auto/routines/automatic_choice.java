@@ -1,213 +1,215 @@
-package frc.auto.routines;
+// package frc.auto.routines;
 
-import com.pathplanner.lib.PathPoint;
+// import com.pathplanner.lib.PathPoint;
 
-import frc.auto.AutoManager;
-import frc.auto.AutoRoutine;
-import frc.auto.trajectory.NemesisPath;
-import frc.auto.trajectory.PathContainer;
-import frc.robot.Robot;
-import frc.settings.DrivetrainSettings;
-import frc.settings.FieldSettings;
-import frc.subsystems.BarIndexer;
-import frc.subsystems.Drivetrain;
-import frc.subsystems.Suction;
-import frc.util.Limelight;
+// import frc.auto.AutoManager;
+// import frc.auto.AutoRoutine;
+// import frc.auto.trajectory.NemesisPath;
+// import frc.auto.trajectory.PathContainer;
+// import frc.robot.Robot;
+// import frc.settings.DrivetrainSettings;
+// import frc.settings.FieldSettings;
+// import frc.subsystems.BarIndexer;
+// import frc.subsystems.Drivetrain;
+// import frc.subsystems.Suction;
+// import frc.util.Limelight;
 
-/**
- * Drive in an S path and Spin routine 
- * @author Abhik Ray
- */
-public class automatic_choice extends AutoRoutine implements DrivetrainSettings, FieldSettings{
-    // NemesisPath forwardS = PathContainer.moveForward;
-    // NemesisPath reverseS = PathContainer.moveReverse;
-    // NemesisPath spin = PathContainer.spinInPlace;
-    NemesisPath CommunityPlacement=PathContainer.automatic_choice;
+// /**
+//  * Drive in an S path and Spin routine 
+//  * @author Abhik Ray
+//  */
+// public class automatic_choice extends AutoRoutine implements DrivetrainSettings, FieldSettings{
+//     // NemesisPath forwardS = PathContainer.moveForward;
+//     // NemesisPath reverseS = PathContainer.moveReverse;
+//     // NemesisPath spin = PathContainer.spinInPlace;
+//     NemesisPath CommunityPlacement=PathContainer.automatic_choice;
 
-    Drivetrain driveT;
-    Suction suction;
-    Limelight lime;
-    double x_offset;
-    BarIndexer bar;
-    private double time;
-    private enum States {
-         ALIGN, PLACE, FIRST_MOVE, PICKUP, SECOND_MOVE, BALANCE, CHOICE, PLACE2, THIRD_MOVE, END 
-    }
+//     Drivetrain driveT;
+//     Suction suction;
+//     Limelight limeTop, limeBottom;
+//     double x_offset;
+//     BarIndexer bar;
+//     private double time;
+//     private enum States {
+//          ALIGN, PLACE, FIRST_MOVE, PICKUP, SECOND_MOVE, BALANCE, CHOICE, PLACE2, THIRD_MOVE, END 
+//     }
     
-    public States autoState;
-    public automatic_choice(){
-        autoState = States.ALIGN;
-    }
+//     public States autoState;
+//     public automatic_choice(){
+//         autoState = States.ALIGN;
+//     }
     
-    private int pathPart;
-    private double levelError;
-    private int tagID;
-    private PathPoint targetPoint;
-    private NemesisPath ontheFly;
+//     private int pathPart;
+//     private double levelError;
+//     private int tagID;
+//     private PathPoint targetPoint;
+//     private NemesisPath ontheFly;
 
-    @Override
-    public String getKey() {
-        // TODO Auto-generated method stub
-        return "place_balance";
-    }
+//     @Override
+//     public String getKey() {
+//         // TODO Auto-generated method stub
+//         return "place_balance";
+//     }
 
-    @Override
-    public void initialize() {
-        System.out.println("INITALIAIRD");
-        // TODO Auto-generated method stub
-        driveT = Robot.getDrivetrainInstance();
-        suction=Robot.getSuctionInstance();
-        lime=new Limelight();
-        suction.succToggle();
-        pathPart=0;
-        bar=Robot.getIndexerInstance();
+//     @Override
+//     public void initialize() {
+//         System.out.println("INITALIAIRD");
+//         // TODO Auto-generated method stub
+//         driveT = Robot.getDrivetrainInstance();
+//         suction=Robot.getSuctionInstance();
+//         limeTop=new Limelight("limelight_top");
+//         limeBottom=new Limelight("limelight_bottom");
+//         suction.succToggle();
+//         pathPart=0;
+//         bar=Robot.getIndexerInstance();
         
         
-    }
+//     }
 
-    @Override
-    public void update() {
-        // TODO Auto-generated method stub
-        time=CommunityPlacement.getTime();
-        lime.update();
-        driveT.update();
-        bar.update();
-        suction.update();
-        driveT.setVisionMatrices();
-        if (lime.hasTarget()){
-            driveT.updateVision(lime.getVisionLocalization());
+//     @Override
+//     public void update() {
+//         // TODO Auto-generated method stub
+//         time=CommunityPlacement.getTime();
+//         limeTop.update();
+//         limeBottom.update();
+//         driveT.update();
+//         bar.update();
+//         suction.update();
+//         driveT.setVisionMatrices();
+//         if (limeTop.hasTarget()){
+//             driveT.updateVision(limeTop.getVisionLocalization());
 
 
 
 
-        }
+//         }
 
         
         
 
-        double x_offset=lime.getDistance();
+//         double x_offset=limeBottom.getDistance();
 
-        levelError=driveT.getLevelEror();
-        switch(autoState){
+//         levelError=driveT.getLevelEror();
+//         switch(autoState){
              
                  
                 
                 
-            case ALIGN:
-                 driveT.aligning(x_offset);
-                 autoState=States.PLACE;
+//             case ALIGN:
+//                  driveT.aligning(x_offset);
+//                  autoState=States.PLACE;
 
                  
                  
                 
                 
-                break;
-            case PLACE:
-                //elevator.UP-Position
-                 suction.stop();
-                 autoState=States.FIRST_MOVE;
+//                 break;
+//             case PLACE:
+//                 //elevator.UP-Position
+//                  suction.stop();
+//                  autoState=States.FIRST_MOVE;
                 
                 
-                break;
-            case PLACE2:
-                //elevator.UP-Position
-                suction.stop();
-                autoState=States.THIRD_MOVE;
-            case THIRD_MOVE:
-                ontheFly=driveT.generatePath(balancePP);
-                ontheFly.runPath(driveT, 0);
-                if (ontheFly.getIsFinished(0)){
+//                 break;
+//             case PLACE2:
+//                 //elevator.UP-Position
+//                 suction.stop();
+//                 autoState=States.THIRD_MOVE;
+//             case THIRD_MOVE:
+//                 ontheFly=driveT.generatePath(balancePP);
+//                 ontheFly.runPath(driveT, 0);
+//                 if (ontheFly.getIsFinished(0)){
                         
     
-                    autoState=States.BALANCE;
-                }
+//                     autoState=States.BALANCE;
+//                 }
 
 
-                break;
+//                 break;
 
-            case FIRST_MOVE://pp=0
-                CommunityPlacement.runPath(driveT,pathPart);
-                if (CommunityPlacement.getIsFinished(pathPart)){
-                    pathPart=1;
+//             case FIRST_MOVE://pp=0
+//                 CommunityPlacement.runPath(driveT,pathPart);
+//                 if (CommunityPlacement.getIsFinished(pathPart)){
+//                     pathPart=1;
 
-                 autoState=States.PICKUP;
-             }
+//                  autoState=States.PICKUP;
+//              }
                  
                 
-            case BALANCE:
-                driveT.autoLevel();
-                if(levelError<.02){
-                    autoState=States.END;
+//             case BALANCE:
+//                 driveT.autoLevel();
+//                 if(levelError<.02){
+//                     autoState=States.END;
 
-                }
+//                 }
                 
-                break;
-            case CHOICE:
+//                 break;
+//             case CHOICE:
 
-                if (lime.hasTarget()){
-                    tagID=lime.getAprilTagID();
-                    targetPoint=idPoses.get(tagID);
-                    ontheFly=driveT.generatePath(targetPoint);
-                    ontheFly.runPath(driveT, 0);
-                    if (ontheFly.getIsFinished(0)){
+//                 if (lime.hasTarget()){
+//                     tagID=lime.getAprilTagID();
+//                     targetPoint=idPoses.get(tagID);
+//                     ontheFly=driveT.generatePath(targetPoint);
+//                     ontheFly.runPath(driveT, 0);
+//                     if (ontheFly.getIsFinished(0)){
                         
     
-                     autoState=States.PLACE2;
-                 }
+//                      autoState=States.PLACE2;
+//                  }
 
 
                     
 
 
-                }
+//                 }
                 
                 
-                break;
+//                 break;
             
 
                 
                 
            
 
-            case PICKUP:
-                bar.toggleIndexer();
-                suction.succToggle();
-                autoState=States.SECOND_MOVE;
+//             case PICKUP:
+//                 bar.toggleIndexer();
+//                 suction.succToggle();
+//                 autoState=States.SECOND_MOVE;
 
 
 
-                break;
-            case SECOND_MOVE://pp=1
-                CommunityPlacement.runPath(driveT, pathPart);
-                if (CommunityPlacement.getIsFinished(pathPart)){
-                    pathPart=2;
+//                 break;
+//             case SECOND_MOVE://pp=1
+//                 CommunityPlacement.runPath(driveT, pathPart);
+//                 if (CommunityPlacement.getIsFinished(pathPart)){
+//                     pathPart=2;
 
-                 autoState=States.CHOICE;
-             }
+//                  autoState=States.CHOICE;
+//              }
 
 
                 
-                break;
+//                 break;
             
-            case END:
-                driveT.stop();
-                System.out.println("done yippee ");
+//             case END:
+//                 driveT.stop();
+//                 System.out.println("done yippee ");
             
-            default:
-                break;
+//             default:
+//                 break;
              
 
 
-        }
-        // System.out.println("running auto");
+//         }
+//         // System.out.println("running auto");
         
-    }
+//     }
 
-    @Override
-    public void end() {
-        // TODO Auto-generated method stub
-        driveT.stop();
+//     @Override
+//     public void end() {
+//         // TODO Auto-generated method stub
+//         driveT.stop();
         
-    }
+//     }
 
-}
+// }
