@@ -42,7 +42,7 @@ public class Robot extends TimedRobot implements FieldSettings {
   private NemesisJoystick leftStick;
   private NemesisJoystick rightStick;
   private AutoChooser chooser;
-  private Limelight limelight_top, limelight_bottom;
+  // private Limelight limelight_top, limelight_bottom;
   // private GridReader reader;
 
   /**
@@ -51,21 +51,21 @@ public class Robot extends TimedRobot implements FieldSettings {
    */
   @Override
   public void robotInit() {
-    limelight_top= new Limelight("limelight_top");
-    limelight_bottom= new Limelight("limelight_bottom");
+    // limelight_top= new Limelight("limelight_top");
+    // limelight_bottom= new Limelight("limelight_bottom");
     drivetrain = Drivetrain.getDriveInstance(pdp);
     // indexer = BarIndexer.getIndexerInstance(pdp);
      suction = Suction.getSuctionInstance(pdp);
     chooser = new AutoChooser(new CommunityPlacement());
     // suction = Suction.getSuctionInstance(pdp);
-    chooser = new AutoChooser(new DriveSpin());
+  
     // reader = new GridReader();
 
     addPeriodic(() -> {
       drivetrain.update();
       // indexer.update(); 
       // suction.update();
-      limelight_bottom.update();
+      // limelight_bottom.update();
     }, REFRESH_RATE, 0.005);
 
    
@@ -108,7 +108,7 @@ public class Robot extends TimedRobot implements FieldSettings {
   @Override
   public void teleopPeriodic() {
     if(leftStick.getTrigger()){
-      drivetrain.aligning(limelight_top.getX());
+      // drivetrain.aligning(limelight_top.getX());
     } else if(rightStick.getTrigger()){
       drivetrain.autoLevel();
     }
