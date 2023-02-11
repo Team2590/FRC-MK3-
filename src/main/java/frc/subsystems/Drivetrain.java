@@ -1,26 +1,37 @@
 package frc.subsystems;
 
+import frc.auto.trajectory.NemesisPath;
 import frc.robot.RobotMap;
 import frc.settings.DrivetrainSettings;
 import frc.util.NemesisModule;
 // import com.swervedrivespecialties.swervelib.Nemesis.GearRatio;
 // import frc.util.NemesisSDSWrapper.NemesisSwerveHelper;
 import frc.util.NemesisSDSWrapper.NemesisSwerveHelper.GearRatio;
+import edu.wpi.first.math.MatBuilder;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+
 import com.ctre.phoenix.sensors.Pigeon2;
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPoint;
+
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -28,6 +39,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 import java.util.function.DoubleSupplier;
+import frc.util.Limelight;
 
 /**
  * Nemesis Drivetrain for 2023
@@ -36,12 +48,20 @@ import java.util.function.DoubleSupplier;
 public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
 
     private static Drivetrain driveTrainInstance = null;
+    static TrajectoryConfig TRAJECTORY_CONFIG = new TrajectoryConfig(MAX_VELOCITY, MAX_ACCELERATION)
+    .setKinematics(swerveKinematics);
+    // Apply the voltage constraint
+    // .addConstraint(autoVoltageConstraint);
+
+    static TrajectoryConfig REVERSED_CONFIG = new TrajectoryConfig(MAX_VELOCITY, MAX_ACCELERATION)
+        .setKinematics(swerveKinematics)
+        .setReversed(true);
 
     private Timer timer;
     private double maxAngularVelocity; // Angular Velocity of the drivetrain in radians    
     private Pigeon2 gyro;
-    private ProfiledPIDController levelController;
-    private ProfiledPIDController steerController;
+    private PIDController levelController;
+    private PIDController steerController;
     private ProfiledPIDController alignController;
     private final NemesisModule frontLeftModule;
     private final NemesisModule frontRightModule;
@@ -54,6 +74,10 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     private ChassisSpeeds levelSpeeds;
     private ChassisSpeeds steerSpeed;
     private ChassisSpeeds alignSpeeds;
+    private double levelError;
+    private Limelight lime;
+
+    private NemesisPath onTheFlyPath;
   
     public static Drivetrain getDriveInstance(PowerDistribution pdp) {
         if (driveTrainInstance == null) {
@@ -67,7 +91,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     }
     private States driveState;
     private final SwerveDriveOdometry odometry;
-    // private final SwerveDrivePoseEstimator poseEstimator;
+    private final SwerveDrivePoseEstimator poseEstimator;
     private SwerveModuleState[] states;
     private SwerveModulePosition[] positions;
     CANCoder frontLeft;
@@ -84,6 +108,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     public Drivetrain(PowerDistribution pdp) {
         // constructor 
         timer = new Timer();
+        timer.start();
         maxAngularVelocity = MAX_VELOCITY / 
         Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
         gyro = new Pigeon2(DRIVETRAIN_PIGEON_ID,CAN_BUS);
@@ -94,13 +119,13 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             new PIDController(0.1, 0, 0),  // TBD
             new ProfiledPIDController(0.2, 0,0, new Constraints(2, 0.2) //TBD
         ));
-        levelController = new ProfiledPIDController(0.1, 0, 0, new Constraints(0.3, 0.1));
-        steerController = new ProfiledPIDController(0.1, 0, 0, new Constraints(0.5, 0.1));
-        alignController = new ProfiledPIDController(0.1, 0, 0, new Constraints(0.5, 0.1));
-        // poseEstimator = new SwerveDrivePoseEstimator(swerveKinematics, getHeadingRot(), positions, new Pose2d(0,0, new Rotation2d()));
+        levelController = new PIDController(2.2, 0.1, 0.2
+        );
+        steerController = new PIDController(4, 0.1, 0);
+        alignController = new ProfiledPIDController(2, 0, 0.2, new Constraints(0.8, 0.2));
         driveState = States.STOPPED;
         frontLeftModule = new NemesisModule(
-            GearRatio.STANDARD, 
+            GearRatio.FAST, 
             FRONT_LEFT_MODULE_DRIVE_MOTOR,
             FRONT_LEFT_MODULE_STEER_MOTOR,
             FRONT_LEFT_MODULE_STEER_ENCODER,
@@ -109,7 +134,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             0
         );
         frontRightModule = new NemesisModule(
-            GearRatio.STANDARD, 
+            GearRatio.FAST, 
             FRONT_RIGHT_MODULE_DRIVE_MOTOR, 
             FRONT_RIGHT_MODULE_STEER_MOTOR, 
             FRONT_RIGHT_MODULE_STEER_ENCODER, 
@@ -118,7 +143,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             1
         );
         backLeftModule = new NemesisModule(
-            GearRatio.STANDARD,
+            GearRatio.FAST,
             BACK_LEFT_MODULE_DRIVE_MOTOR,
             BACK_LEFT_MODULE_STEER_MOTOR,
             BACK_LEFT_MODULE_STEER_ENCODER, 
@@ -127,7 +152,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
             2
         );
         backRightModule = new NemesisModule(
-            GearRatio.STANDARD,
+            GearRatio.FAST,
             BACK_RIGHT_MODULE_DRIVE_MOTOR,
             BACK_RIGHT_MODULE_STEER_MOTOR,
             BACK_RIGHT_MODULE_STEER_ENCODER, 
@@ -139,7 +164,10 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         positions = new SwerveModulePosition[] 
             {frontLeftModule.getPosition(), frontRightModule.getPosition(), 
             backLeftModule.getPosition(), backRightModule.getPosition()};
-
+        poseEstimator = new SwerveDrivePoseEstimator(swerveKinematics, getHeadingRot(), positions, new Pose2d(0,0, new Rotation2d())
+            // new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01, 0.02),
+            // new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01, 0.02)
+        );
         odometry = new SwerveDriveOdometry(swerveKinematics, getHeadingRot(), positions, new Pose2d(0,0, new Rotation2d()));
         odometryX = new DoubleSupplier() {
             @Override
@@ -166,17 +194,26 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         backRight = new CANCoder(11,CAN_BUS);
         swerveMods = new NemesisModule[]{frontLeftModule, frontRightModule, backLeftModule, backRightModule};
         encoders = new CANCoder[]{frontLeft, frontRight, backLeft, backRight};
+        lime=new Limelight();
         
     }
     public void update(){
-        switch(driveState){
+        SmartDashboard.putString("Drive State", driveState.toString());
+        double modHeading = getHeading() % 360;
+        SmartDashboard.putNumber("Mod Heading", modHeading);
+        double targetParallel =  Math.abs(modHeading) < 180 ? getHeading() - modHeading:getHeading() + (360 - modHeading); // Turn to the closest rotation
+        targetParallel *= targetParallel > 0 ? 1:-1;
+        SmartDashboard.putNumber("target heading", targetParallel);
+       switch(driveState){
             case DRIVE:
+                SmartDashboard.putString("Drive Speeds", driveSpeeds.toString());
                 drive(driveSpeeds);
                 break;
             case STOPPED:                
                 drive(new ChassisSpeeds(0,0,0));
                 break;
             case LEVELING:
+                SmartDashboard.putString("Level Command", levelSpeeds.toString());
                 drive(levelSpeeds);
                 break;
             case TARGETTING:
@@ -189,15 +226,29 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
                 // PathContainer.moveForward.runPath(this);
                 break;
             case ALIGNING: 
+                SmartDashboard.putString("Align Speeds", driveSpeeds.toString());
                 drive(alignSpeeds);
                 break; 
         }
         updatePose();
     }
     public void aligning(double xOffset){
+        SmartDashboard.putNumber("x offset", xOffset);
+        SmartDashboard.putNumber("x power", alignController.calculate(xOffset,0));
+        SmartDashboard.putNumber("heading", getHeading());
+        // double targetParallel = getHeading() > 180 ? 360:0;
+        double modHeading = getHeading() % 360;
+        double targetParallel =  Math.abs(modHeading) < 180 ? getHeading() - modHeading:getHeading() + (360 - modHeading); // Turn to the closest rotation
+        targetParallel *= modHeading > 0 ? 1:-1;
         driveState = States.ALIGNING;
         alignSpeeds = new ChassisSpeeds(
-            alignController.calculate(xOffset,0),0,0);
+            0,-alignController.calculate(xOffset,0),
+            Math.copySign(steerController.calculate(getHeading(),targetParallel), targetParallel)) ;
+    }
+    public NemesisPath generatePath(PathPoint finalPP){
+        // TO-DO: figure out which configuration to use automatically
+        onTheFlyPath = new NemesisPath(new PathPoint(new Translation2d(odometry.getPoseMeters().getX(),odometry.getPoseMeters().getY()), getHeadingRot()), finalPP, MAX_VELOCITY,MAX_ACCELERATION);
+        return onTheFlyPath;
     }
     /**
      * Sets drivetrain speeds based on a desired position from Holonomic Controller
@@ -208,11 +259,20 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         pathfollowSpeeds = calculatedCommand;
     }
     /**
+     * Sets drivetrain speeds based on a desired position & rotation from Holonomic Controller
+     * @param desiredPosition
+     */
+    public void followPath(State desiredPosition, Rotation2d rotation){
+        ChassisSpeeds calculatedCommand = driveController.calculate(odometry.getPoseMeters(), desiredPosition, rotation);
+        pathfollowSpeeds = calculatedCommand;
+    }
+    /**
      * Switch the robot the leveling state and control position based off of Gyro Pitch 
      */
     public void autoLevel(){
         driveState = States.LEVELING;
         levelSpeeds = new ChassisSpeeds(levelController.calculate(gyro.getPitch(), 0),0,0);
+        
     }
     /**
      * Updates each Swerve Module's Position
@@ -227,8 +287,11 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     public void updatePose(){
         updateSwerveModules();
         odometry.update(getHeadingRot(),positions);
-        // poseEstimator.update(getHeadingRot(),positions);
+        poseEstimator.update(getHeadingRot(),positions);
         // poseEstimator.addVisionMeasurement(null, BACK_LEFT_MODULE_DRIVE_MOTOR, null);
+    }
+    public void updateVision(Pose2d visionPose){
+        poseEstimator.addVisionMeasurement(visionPose, timer.get());
     }
     /**
      * Obtains Array of Positions from Each Swerve Module
@@ -248,10 +311,11 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
      * X, Y, Rotation (Odometry), Rotation (Gyro) 
      */
     public void outputOdometry(){
-        SmartDashboard.putNumber("X Odometry", odometry.getPoseMeters().getX());
-        SmartDashboard.putNumber("Y Odometry", odometry.getPoseMeters().getY());
-        SmartDashboard.putNumber("Rotation Odometry", odometry.getPoseMeters().getRotation().getDegrees());
+        SmartDashboard.putNumber("X Odometry", poseEstimator.getEstimatedPosition().getX());
+        SmartDashboard.putNumber("Y Odometry", poseEstimator.getEstimatedPosition().getY());
+        SmartDashboard.putNumber("Rotation Odometry", poseEstimator.getEstimatedPosition().getRotation().getDegrees());
         SmartDashboard.putNumber("Rotation Gyro", gyro.getYaw());
+        SmartDashboard.putNumber("Robot Roll", gyro.getRoll());
         // SmartDashboard.putNumber("Gyro Z", gyro.get());
     }
     /**
@@ -308,6 +372,32 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
     public void resetGyro() {
         gyro.setYaw(0);
      }
+
+     public double getLevelEror(){
+        return Math.abs((0-gyro.getPitch()));
+     }
+
+     public void setVisionMatrices(){
+
+        if(/*Math.sqrt( (Math.pow(poseEstimator.getEstimatedPosition().getX(),2) ) + (Math.pow(poseEstimator.getEstimatedPosition().getY(),2)))*/lime.getDeltaDistance() >=1){
+            poseEstimator.setVisionMeasurementStdDevs(new MatBuilder<>(Nat.N3(),Nat.N1()).fill(.1,.1,.01)
+
+
+
+
+            );
+
+        }
+        else{
+            poseEstimator.setVisionMeasurementStdDevs(new MatBuilder<>(Nat.N3(),Nat.N1()).fill(.5,.5,.05));
+
+        }
+    
+
+
+
+
+    }
     /**
      * Set Odometry to a particular starting pose 
      * @param resetpose Starting Pose 
