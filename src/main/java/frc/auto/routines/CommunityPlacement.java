@@ -50,7 +50,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
         System.out.println("INITALIAIRD");
         // TODO Auto-generated method stub
         driveT = Robot.getDrivetrainInstance();
-        suction=Robot.getSuctionInstance();
+        // suction=Robot.getSuctionInstance();
         // lime=new Limelight("limelight_low");
        // suction.succToggle();
         pathPart=0;
