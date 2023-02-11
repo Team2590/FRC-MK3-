@@ -57,7 +57,7 @@ public class NemesisPath {
     public void runPath(Drivetrain drivetrain, int pathNum){
         if(!isStarted){
         // start it
-            System.out.println("STARTING PATH"+"reset encoders");
+            SmartDashboard.putBoolean("running_path", true);
             
             SmartDashboard.putNumber("path_parts", pathGroup.size());
             drivetrain.resetEncoder();

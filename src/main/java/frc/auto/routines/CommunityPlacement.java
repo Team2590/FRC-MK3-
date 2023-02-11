@@ -1,5 +1,6 @@
 package frc.auto.routines;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.auto.AutoManager;
 import frc.auto.AutoRoutine;
 import frc.auto.trajectory.NemesisPath;
@@ -24,6 +25,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
     Drivetrain driveT;
     // Suction suction;
     // Limelight lime;
+    boolean is_running;
     double x_offset;
     BarIndexer bar;
     private double time;
@@ -55,18 +57,25 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
        // suction.succToggle();
         pathPart=0;
         //bar=Robot.getIndexerInstance();
+        SmartDashboard.putBoolean("Auton_initialized", true);
+        is_running=false;
         
         
     }
 
     @Override
     public void update() {
+
+        SmartDashboard.putNumber("current_path_part", pathPart);
         // TODO Auto-generated method stub
         time=CommunityPlacement.getTime();
         // lime.update();
         driveT.update();
        // bar.update();
        // suction.update();
+       is_running=true;
+       SmartDashboard.putBoolean("is_running", is_running);
+       SmartDashboard.putString("currentautonState",autoState.name() );
 
         
         
@@ -74,6 +83,9 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
         // double x_offset=lime.getDistance();
 
         levelError=driveT.getLevelEror();
+        SmartDashboard.putNumber("level_error", levelError);
+        SmartDashboard.updateValues();
+
         switch(autoState){
              
                  
@@ -106,7 +118,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
                 if (CommunityPlacement.getIsFinished(pathPart)){
                     pathPart=1;
 
-                 autoState=States.PICKUP;
+                 autoState=States.SECOND_MOVE;
              }
                  
                 
@@ -144,7 +156,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
                 if (CommunityPlacement.getIsFinished(pathPart)){
                     pathPart=2;
 
-                 autoState=States.PLACE2;
+                 autoState=States.THIRD_MOVE;
              }
 
 
