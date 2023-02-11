@@ -20,7 +20,7 @@ import frc.looper.Looper;
 import frc.settings.FieldSettings;
 import frc.subsystems.BarIndexer;
 import frc.subsystems.Drivetrain;
-import frc.subsystems.Suction;
+// import frc.subsystems.Suction;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import frc.util.NemesisJoystick;
 // import frc.util.GridReader;
@@ -35,7 +35,7 @@ public class Robot extends TimedRobot implements FieldSettings {
   public static PowerDistribution pdp;
   public static Drivetrain drivetrain;
   public static BarIndexer indexer;
-  public static Suction suction;
+  // public static Suction suction;
 
   public static Compressor compressor;
   
@@ -55,7 +55,7 @@ public class Robot extends TimedRobot implements FieldSettings {
     // limelight_bottom= new Limelight("limelight_bottom");
     drivetrain = Drivetrain.getDriveInstance(pdp);
     // indexer = BarIndexer.getIndexerInstance(pdp);
-     suction = Suction.getSuctionInstance(pdp);
+    //  suction = Suction.getSuctionInstance(pdp);
     chooser = new AutoChooser(new CommunityPlacement());
     // suction = Suction.getSuctionInstance(pdp);
   
@@ -152,9 +152,9 @@ public class Robot extends TimedRobot implements FieldSettings {
   public static Drivetrain getDrivetrainInstance(){
     return drivetrain;
   }
-  public static Suction getSuctionInstance(){
-    return suction;
-  }
+  // public static Suction getSuctionInstance(){
+  //   return suction;
+  // }
   public static BarIndexer getIndexerInstance(){
     return indexer;
   }

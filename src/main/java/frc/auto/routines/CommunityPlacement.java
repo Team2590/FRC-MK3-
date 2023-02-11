@@ -8,7 +8,7 @@ import frc.robot.Robot;
 import frc.settings.DrivetrainSettings;
 import frc.subsystems.BarIndexer;
 import frc.subsystems.Drivetrain;
-import frc.subsystems.Suction;
+// import frc.subsystems.Suction;
 import frc.util.Limelight;
 
 /**
@@ -22,7 +22,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
     NemesisPath CommunityPlacement=PathContainer.CommunityPlacement;
 
     Drivetrain driveT;
-    Suction suction;
+    // Suction suction;
     // Limelight lime;
     double x_offset;
     BarIndexer bar;

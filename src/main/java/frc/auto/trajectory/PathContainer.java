@@ -21,7 +21,7 @@ import frc.auto.routines.CommunityPlacement;
 import frc.settings.DrivetrainSettings;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 import com.pathplanner.lib.PathPlannerTrajectory;
-import frc.subsystems.Suction;
+// import frc.subsystems.Suction;
 
 
 public class PathContainer implements DrivetrainSettings{
