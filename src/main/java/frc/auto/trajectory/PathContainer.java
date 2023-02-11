@@ -1,6 +1,10 @@
 package frc.auto.trajectory;
 
+import java.lang.reflect.Method;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
@@ -13,13 +17,18 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.wpilibj.Filesystem;
+import frc.auto.routines.automatic_choice;
 import frc.settings.DrivetrainSettings;
+import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import frc.subsystems.Suction;
+
 
 public class PathContainer implements DrivetrainSettings{
 
     // static String RoboRios_curveJSOn="paths/output/AyanPath.wpilib.json";  
-    static String RoboRios_curveJSOn="paths/output/AyanPath.wpilib.json";  
-    static Path s_curvePath=Filesystem.getDeployDirectory().toPath().resolve(RoboRios_curveJSOn); //This gets the path from the src/main/deploy
+      
+    
 
 
     // trajectory config should be the same for all paths
@@ -59,4 +68,11 @@ public class PathContainer implements DrivetrainSettings{
         // );
 
         // PathPlannerTrajectory examplePath = PathPlanner.loadPath("Example Path", new PathConstraints(4, 3));
-}
+        public static NemesisPath place_balance=new NemesisPath("place_balance",MAX_VELOCITY,MAX_ACCELERATION);
+        public static NemesisPath CommunityPlacement= new NemesisPath("CommunityPlacement",MAX_VELOCITY, MAX_ACCELERATION);
+        public static NemesisPath automatic_choice=new NemesisPath("automatic_choice",MAX_VELOCITY, MAX_ACCELERATION);
+
+
+
+    }           
+
