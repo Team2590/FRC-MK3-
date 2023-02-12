@@ -2,6 +2,7 @@ package frc.auto.routines;
 
 import java.util.ArrayList;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.auto.AutoManager;
 import frc.auto.AutoRoutine;
 import frc.auto.trajectory.NemesisPath;
@@ -35,7 +36,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
     
     public States autoState;
     public CommunityPlacement(){
-        autoState = States.ALIGN;
+        autoState = States.FIRST_MOVE;
     }
     
     private int pathPart;
@@ -58,8 +59,13 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
        // suction.succToggle();
         pathPart=0;
         //bar=Robot.getIndexerInstance();
-        
-        
+        currPath=paths.get(pathPart);
+        SmartDashboard.putNumber("initPathPArt", pathPart);
+        SmartDashboard.putBoolean("init", true);
+        autoState=States.FIRST_MOVE;
+        SmartDashboard.putNumber("path group size", paths.size());
+        SmartDashboard.updateValues();
+        driveT.startAuton();
     }
 
     @Override
@@ -70,7 +76,14 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
         driveT.update();
        // bar.update();
        // suction.update();
-       currPath=paths.get(pathPart);
+
+        SmartDashboard.putBoolean("is_running", true);
+        SmartDashboard.putString("state of auto", autoState.name());
+        SmartDashboard.putNumber("current_path_part", pathPart);
+        SmartDashboard.updateValues();
+
+
+
         double x_offset=lime.getDistance();
         levelError=driveT.getLevelEror();
         switch(autoState){
@@ -94,7 +107,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
                 if (currPath.getIsFinished()){
                     pathPart=1;
 
-                 autoState=States.PICKUP;
+                 autoState=States.SECOND_MOVE;
              }
                  
                 
@@ -110,6 +123,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
                 
                 
             case THIRD_MOVE://PP=2
+            currPath=paths.get(pathPart);
             currPath.runPath(driveT);
             if (currPath.getIsFinished()){
              autoState=States.BALANCE;
@@ -120,11 +134,12 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
                 autoState=States.SECOND_MOVE;
                 break;
             case SECOND_MOVE://pp=1
+                currPath=paths.get(pathPart);
                 currPath.runPath(driveT);
                 if (currPath.getIsFinished()){
                     pathPart=2;
 
-                 autoState=States.PLACE2;
+                 autoState=States.THIRD_MOVE;
              }
 
 

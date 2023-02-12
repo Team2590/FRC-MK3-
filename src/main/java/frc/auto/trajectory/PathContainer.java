@@ -75,17 +75,17 @@ public class PathContainer implements DrivetrainSettings{
         // public static NemesisPath automatic_choice=new NemesisPath("automatic_choice",MAX_VELOCITY, MAX_ACCELERATION);
         public static ArrayList<NemesisPath> getCommunityPaths(){
             ArrayList<NemesisPath> communityPaths = new ArrayList<NemesisPath>();
-            communityPaths.add(new NemesisPath("CommunityPlacement", MAX_VELOCITY, MAX_ACCELERATION,0));       
-            communityPaths.add(new NemesisPath("CommunityPlacement", MAX_VELOCITY, MAX_ACCELERATION, 1));
-            communityPaths.add(new NemesisPath("CommunityPlacement", MAX_VELOCITY, MAX_ACCELERATION, 2));
+            communityPaths.add(new NemesisPath("CommunityPlacement", MAX_VELOCITY, MAX_ACCELERATION,0, false));       
+            communityPaths.add(new NemesisPath("CommunityPlacement", MAX_VELOCITY, MAX_ACCELERATION, 1,true));
+            communityPaths.add(new NemesisPath("CommunityPlacement", MAX_VELOCITY, MAX_ACCELERATION, 2,false ));
             return communityPaths;
         }
-        public static ArrayList<NemesisPath> getAutomatedPaths(){
-            ArrayList<NemesisPath> automatedPaths = new ArrayList<NemesisPath>();
-            automatedPaths.add(new NemesisPath("auto_choice", MAX_VELOCITY, MAX_ACCELERATION,0));       
-            automatedPaths.add(new NemesisPath("auto_choice", MAX_VELOCITY, MAX_ACCELERATION, 1));
-            return automatedPaths;
-        }
+        // public static ArrayList<NemesisPath> getAutomatedPaths(){
+        //     ArrayList<NemesisPath> automatedPaths = new ArrayList<NemesisPath>();
+        //     automatedPaths.add(new NemesisPath("auto_choice", MAX_VELOCITY, MAX_ACCELERATION,0));       
+        //     automatedPaths.add(new NemesisPath("auto_choice", MAX_VELOCITY, MAX_ACCELERATION, 1));
+        //     return automatedPaths;
+        // }
 }         
 
 

@@ -222,7 +222,7 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
                 drive(steerSpeed);
                 break;
             case TRAJECTORY:
-                System.out.println("IN TRAJECTORY");
+                SmartDashboard.putString("Traj Speeds", pathfollowSpeeds.toString());
                 drive(pathfollowSpeeds);
                 // PathContainer.moveForward.runPath(this);
                 break;
@@ -256,15 +256,17 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
      * @param desiredPosition
      */
     public void followPath(State desiredPosition){
-        ChassisSpeeds calculatedCommand = driveController.calculate(odometry.getPoseMeters(), desiredPosition, new Rotation2d(0));
-        pathfollowSpeeds = calculatedCommand;
+        driveState = States.TRAJECTORY;
+        ChassisSpeeds calc = driveController.calculate(poseEstimator.getEstimatedPosition(), desiredPosition, new Rotation2d(0));
+        ChassisSpeeds adjusted = new ChassisSpeeds(calc.vxMetersPerSecond * 100, calc.vyMetersPerSecond *100, calc.omegaRadiansPerSecond);
+        pathfollowSpeeds = adjusted;
     }
     /**
      * Sets drivetrain speeds based on a desired position & rotation from Holonomic Controller
      * @param desiredPosition
      */
     public void followPath(State desiredPosition, Rotation2d rotation){
-        ChassisSpeeds calculatedCommand = driveController.calculate(odometry.getPoseMeters(), desiredPosition, rotation);
+        ChassisSpeeds calculatedCommand = driveController.calculate(poseEstimator.getEstimatedPosition(), desiredPosition, rotation);
         pathfollowSpeeds = calculatedCommand;
     }
     /**
@@ -405,8 +407,9 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
      * @param modPositions Starting Module Positions 
      */
     public void resetOdometry(Pose2d resetpose, SwerveModulePosition[] modPositions){
-        for(NemesisModule module : swerveMods) module.reset();  
+        // for(NemesisModule module : swerveMods) module.reset();  
         odometry.resetPosition(getHeadingRot(),modPositions,resetpose);
+        poseEstimator.resetPosition(getHeadingRot(), modPositions, resetpose);
     }
     /**
      * Set Encoder, Module, and Odometry Postiions to 0 
@@ -416,7 +419,10 @@ public class Drivetrain implements RobotMap, Subsystem, DrivetrainSettings {
         for(CANCoder encoder : encoders)encoder.setPosition(0);
         for(NemesisModule module : swerveMods) module.reset();
         resetOdometry(new Pose2d(0, 0, getHeadingRot()), positions);
-        
+        poseEstimator.resetPosition(
+            getHeadingRot(), positions, new Pose2d(0, 0, getHeadingRot())
+            );
+
     }
     /**
      * @return Robot Heading in Degrees

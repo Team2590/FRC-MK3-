@@ -17,6 +17,7 @@ import frc.auto.routines.CommunityPlacement;
 import frc.auto.routines.DriveSpin;
 import frc.auto.routines.CommunityPlacement;
 import frc.looper.Looper;
+import frc.settings.DrivetrainSettings;
 import frc.settings.FieldSettings;
 import frc.subsystems.BarIndexer;
 import frc.subsystems.Drivetrain;
@@ -30,7 +31,7 @@ import frc.util.Limelight;
  * Code for the 2023 Nemesis Robot
  * @author Abhik Ray 
  */
-public class Robot extends TimedRobot implements FieldSettings {
+public class Robot extends TimedRobot implements FieldSettings,DrivetrainSettings {
 
   public static PowerDistribution pdp;
   public static Drivetrain drivetrain;
@@ -88,6 +89,8 @@ public class Robot extends TimedRobot implements FieldSettings {
   @Override
   public void autonomousInit() {
     drivetrain.startAuton();
+    SmartDashboard.putNumber("max velocity", MAX_VELOCITY);
+    SmartDashboard.putNumber("max acceleration", MAX_ACCELERATION);
 
     // pick Auto
     chooser.pickAuto("Community_Placement");

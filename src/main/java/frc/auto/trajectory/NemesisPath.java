@@ -39,11 +39,10 @@ public class NemesisPath {
     //     isStarted = false;
     //     path = TrajectoryGenerator.generateTrajectory(initialPose, List.of(waypoints), finalPose2d, config); 
     // }
-    public NemesisPath(String pathJSON, double maxVelocity, double maxAcceleration, int part){
-
+    public NemesisPath(String pathJSON, double maxVelocity, double maxAcceleration, int part, boolean reverse){
             isFinished = false;
             isStarted = false;
-            path=PathPlanner.loadPathGroup(pathJSON, new PathConstraints(maxVelocity, maxAcceleration)).get(part);
+            path=PathPlanner.loadPathGroup(pathJSON,maxVelocity*.5, maxAcceleration*.5,reverse).get(part);
             // pathGroup = PathPlanner.loadPathGroup(pathJSON, new PathConstraints(maxVelocity, maxAcceleration));
             System.out.println("PATH INITIALIZED");
         
@@ -62,6 +61,8 @@ public class NemesisPath {
             
            
             drivetrain.resetOdometry(path.getInitialHolonomicPose(), drivetrain.getSwervePositions());
+            SmartDashboard.putString("Path Initial Pose", path.getInitialHolonomicPose().toString());
+
             timer.reset();
             timer.start(); 
             isStarted = true;
@@ -72,6 +73,7 @@ public class NemesisPath {
             SmartDashboard.putNumber("Time:", currentTime);
             SmartDashboard.putNumber("Sample X:", path.sample(currentTime).poseMeters.getX());
             SmartDashboard.putNumber("Sample Y:", path.sample(currentTime).poseMeters.getY());
+            SmartDashboard.putNumber("Sample  velocity", path.sample(currentTime).velocityMetersPerSecond);
             drivetrain.followPath(path.sample(currentTime));
                 
 
