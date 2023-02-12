@@ -18,10 +18,12 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.wpilibj.Filesystem;
 import frc.auto.routines.CommunityPlacement;
+import frc.auto.routines.automatic_choice;
 import frc.settings.DrivetrainSettings;
 import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 import com.pathplanner.lib.PathPlannerTrajectory;
-// import frc.subsystems.Suction;
+import frc.subsystems.Suction;
+
 
 
 public class PathContainer implements DrivetrainSettings{
@@ -69,10 +71,21 @@ public class PathContainer implements DrivetrainSettings{
 
         // PathPlannerTrajectory examplePath = PathPlanner.loadPath("Example Path", new PathConstraints(4, 3));
         // public static NemesisPath place_balance=new NemesisPath("place_balance",MAX_VELOCITY,MAX_ACCELERATION);
-        public static NemesisPath CommunityPlacement= new NemesisPath("CommunityPlacement",MAX_VELOCITY, MAX_ACCELERATION);
+        // public static NemesisPath CommunityPlacement= new NemesisPath("CommunityPlacement",MAX_VELOCITY, MAX_ACCELERATION);
         // public static NemesisPath automatic_choice=new NemesisPath("automatic_choice",MAX_VELOCITY, MAX_ACCELERATION);
+        public static ArrayList<NemesisPath> getCommunityPaths(){
+            ArrayList<NemesisPath> communityPaths = new ArrayList<NemesisPath>();
+            communityPaths.add(new NemesisPath("CommunityPlacement", MAX_VELOCITY, MAX_ACCELERATION,0));       
+            communityPaths.add(new NemesisPath("CommunityPlacement", MAX_VELOCITY, MAX_ACCELERATION, 1));
+            communityPaths.add(new NemesisPath("CommunityPlacement", MAX_VELOCITY, MAX_ACCELERATION, 2));
+            return communityPaths;
+        }
+        public static ArrayList<NemesisPath> getAutomatedPaths(){
+            ArrayList<NemesisPath> automatedPaths = new ArrayList<NemesisPath>();
+            automatedPaths.add(new NemesisPath("auto_choice", MAX_VELOCITY, MAX_ACCELERATION,0));       
+            automatedPaths.add(new NemesisPath("auto_choice", MAX_VELOCITY, MAX_ACCELERATION, 1));
+            return automatedPaths;
+        }
+}         
 
-
-
-    }           
 
