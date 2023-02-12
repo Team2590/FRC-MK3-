@@ -31,19 +31,21 @@ public class NemesisPath {
     private boolean isStarted;
     private boolean isFinished;
     private List<PathPlannerTrajectory> pathGroup;
-    private Trajectory path;
+    private PathPlannerTrajectory path;
     private PathPlannerTrajectory ontheFly;
     
-    public NemesisPath(TrajectoryConfig config, Pose2d initialPose, Pose2d finalPose2d, Translation2d[] waypoints){
-        isFinished = false;
-        isStarted = false;
-        path = TrajectoryGenerator.generateTrajectory(initialPose, List.of(waypoints), finalPose2d, config); 
-    }
-    public NemesisPath(String pathJSON, double maxVelocity, double maxAcceleration){       
-        isFinished = false;
-        isStarted = false;
-        pathGroup = PathPlanner.loadPathGroup(pathJSON, new PathConstraints(maxVelocity, maxAcceleration));
-        System.out.println("PATH INITIALIZED");
+    // public NemesisPath(TrajectoryConfig config, Pose2d initialPose, Pose2d finalPose2d, Translation2d[] waypoints){
+    //     isFinished = false;
+    //     isStarted = false;
+    //     path = TrajectoryGenerator.generateTrajectory(initialPose, List.of(waypoints), finalPose2d, config); 
+    // }
+    public NemesisPath(String pathJSON, double maxVelocity, double maxAcceleration, int part){
+
+            isFinished = false;
+            isStarted = false;
+            path=PathPlanner.loadPathGroup(pathJSON, new PathConstraints(maxVelocity, maxAcceleration)).get(part);
+            // pathGroup = PathPlanner.loadPathGroup(pathJSON, new PathConstraints(maxVelocity, maxAcceleration));
+            System.out.println("PATH INITIALIZED");
         
      
     }
@@ -51,17 +53,15 @@ public class NemesisPath {
         isFinished=false;
         isStarted=false;
         ontheFly=PathPlanner.generatePath(new PathConstraints(maxVelocity, maxAcceleration), initial, ending);
-        pathGroup.add(0,ontheFly);
+        // pathGroup.add(0,ontheFly);
     }//on the fly 
-    public void runPath(Drivetrain drivetrain, int pathNum){
+    public void runPath(Drivetrain drivetrain){
         if(!isStarted){
         // start it
-            SmartDashboard.putBoolean("running_path", true);
+            System.out.println("STARTING PATH"+"reset encoders");
             
-            SmartDashboard.putNumber("path_parts", pathGroup.size());
-            drivetrain.resetEncoder();
-            drivetrain.resetOdometry(pathGroup.get(0).getInitialHolonomicPose(), drivetrain.getSwervePositions());
-            System.out.println(pathGroup.get(0).getInitialHolonomicPose());
+           
+            drivetrain.resetOdometry(path.getInitialHolonomicPose(), drivetrain.getSwervePositions());
             timer.reset();
             timer.start(); 
             isStarted = true;
@@ -72,24 +72,30 @@ public class NemesisPath {
             SmartDashboard.putNumber("Time:", currentTime);
             SmartDashboard.putNumber("Sample X:", path.sample(currentTime).poseMeters.getX());
             SmartDashboard.putNumber("Sample Y:", path.sample(currentTime).poseMeters.getY());
-            drivetrain.followPath(pathGroup.get(pathNum).sample(currentTime));
+            drivetrain.followPath(path.sample(currentTime));
+                
+
+                
+            
+            
+             
         }
     }
     public boolean getIsStarted(){
         return isStarted;
     }
-    public boolean getIsFinished(int pathNum){
-        isFinished = timer.get() > pathGroup.get(pathNum).getTotalTimeSeconds();
+    public boolean getIsFinished(){
+        isFinished = timer.get() > path.getTotalTimeSeconds();
         return isFinished;
     }
     public double getTime(){
         return timer.get();
     }
-    public List<EventMarker> getEventMarkers(int pathNum){
-        return pathGroup.get(pathNum).getMarkers();
+    public List<EventMarker> getEventMarkers(){
+        return path.getMarkers();
     }
-    public State getEventState(int time, int pathNum){
-        return pathGroup.get(pathNum).getStates().get(time);
+    public State getEventState(int time){
+        return path.getStates().get(time);
     }
     public void setWait(long duration){
         try{
