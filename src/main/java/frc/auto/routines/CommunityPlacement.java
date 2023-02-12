@@ -101,6 +101,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
                 driveT.aligning(x_offset);
                // suction.stop();
                 autoState=States.THIRD_MOVE;
+                break;
 
             case FIRST_MOVE://pp=0
                 currPath.runPath(driveT);
@@ -108,6 +109,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
                     pathPart=1;
 
                  autoState=States.SECOND_MOVE;
+                 break;
              }
                  
                 
@@ -140,6 +142,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
                     pathPart=2;
 
                  autoState=States.THIRD_MOVE;
+                 
              }
 
 
@@ -149,7 +152,7 @@ public class CommunityPlacement extends AutoRoutine implements DrivetrainSetting
             case END:
                 driveT.stop();
                 System.out.println("done yippee ");
-             
+                break;
 
 
         }
