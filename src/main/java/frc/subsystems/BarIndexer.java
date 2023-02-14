@@ -13,9 +13,11 @@ import frc.robot.RobotMap;
 import frc.settings.BarIndexerSettings;
 
 public class BarIndexer implements RobotMap, Subsystem, BarIndexerSettings {
-    
-    private VictorSPX barMotor;
+    private VictorSPX barMotorL;
+    private VictorSPX barMotorR;
+    private VictorSPX lift;
     private double barPower;
+    private double liftPower;
 
     private static BarIndexer indexer = null;
     private enum States {
@@ -25,8 +27,10 @@ public class BarIndexer implements RobotMap, Subsystem, BarIndexerSettings {
     private boolean indexSolStatus;
     public BarIndexer(PowerDistribution pdp){
         indexState = States.STOPPED;
-        // indexSolStatus = false;
-        barMotor = new VictorSPX(BAR_ID);
+        barMotorL = new VictorSPX(BAR_L_ID);
+        barMotorR = new VictorSPX(BAR_R_ID);
+        lift = new VictorSPX(BLOWER);
+        barMotorL.setInverted(true);
     }
     public static BarIndexer getIndexerInstance(PowerDistribution pdp) {
         if (indexer == null) {
@@ -37,14 +41,21 @@ public class BarIndexer implements RobotMap, Subsystem, BarIndexerSettings {
     public void update(){
         switch(indexState){
             case ON:
-                SmartDashboard.putBoolean("Index status", indexSolStatus);
-                barMotor.set(ControlMode.PercentOutput,barPower);
-                // barSol.set(indexSolStatus);
+                move(barPower);
+                lift.set(ControlMode.PercentOutput, liftPower);
                 break;
-            case STOPPED:
-                // barSol.set(false);
+                case STOPPED:
+                move(0);
+                lift.set(ControlMode.PercentOutput, 0);
                 break;
         }
+    }
+    public void move(double power){           
+        barMotorL.set(ControlMode.PercentOutput,barPower);
+        barMotorR.set(ControlMode.PercentOutput,barPower);
+    }
+    public void setLift(double power){
+        liftPower = power;
     }
     public void setPower(double power){
         indexState=States.ON;

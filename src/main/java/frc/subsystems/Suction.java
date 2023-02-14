@@ -16,12 +16,10 @@ public class Suction implements RobotMap, Subsystem, SuctionSettings {
     private Solenoid suctionSol;
     private Solenoid liftSol;
     private Solenoid thrustSol;
-
     private boolean suctionStatus;
     private boolean liftStatus;
     private boolean thrustStatus;
     private double vacuumPower = 0.5;
-
     private CANSparkMax vacuum;
 
     private static Suction succ = null;

@@ -31,7 +31,7 @@ public class Robot extends TimedRobot implements FieldSettings {
 
   public static PowerDistribution pdp;
   public static Drivetrain drivetrain;
-  // public static BarIndexer indexer;
+  public static BarIndexer indexer;
   public static Suction suction;
 
   public static Compressor compressor;
@@ -98,20 +98,31 @@ public class Robot extends TimedRobot implements FieldSettings {
 
   @Override
   public void teleopPeriodic() {
-    drivetrain.inputHandler(leftStick.getYBanded() / 2, leftStick.getXBanded() / 2, rightStick.getXBanded() / 2);
+    drivetrain.inputHandler(-leftStick.getYBanded() / 2, -leftStick.getXBanded() / 2, -rightStick.getXBanded() / 2);
     if(leftStick.getTriggerPressed()){
       suction.liftToggle();
     }
     if(rightStick.getTriggerPressed()){
       suction.succToggle(); 
     }
-    // if(leftStick.getPOV() == 0){
-    //   indexer.setPower(0.3);
-    // } else if(leftStick.getPOV() == 180){
-    //   indexer.setPower(-0.3);
+
+    // if(rightStick.getTrigger()){
+    //   indexer.setPower(0.5);
+    // } else if(leftStick.getTrigger()){
+    //   indexer.setPower(-0.5);
     // } else {
     //   indexer.setPower(0);
-    // }                                                     
+    // }
+    // if(rightStick.getPOV() < 0){
+    //   indexer.setLift(0);
+    // }
+    // else if(rightStick.getPOV() > 270 || rightStick.getPOV() < 90){
+    //   indexer.setLift(0.5);
+    // } else if(rightStick.getPOV() > 90 ||
+    //  rightStick.getPOV() < 270){
+    //   indexer.setLift(-0.5);
+    // }
+
     if(rightStick.getRawButtonPressed(3)){
       suction.thrustToggle();
     }
